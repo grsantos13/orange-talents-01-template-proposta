@@ -1,9 +1,11 @@
 package br.com.zup.propostas.proposta;
 
-import br.com.zup.propostas.compatilhado.validacao.CPFouCNPJ.CPFouCNPJ;
+import br.com.zup.propostas.compartilhado.validacao.CPFouCNPJ.CPFouCNPJ;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -43,6 +45,9 @@ public class Proposta {
     @Column(nullable = false)
     private BigDecimal salario;
 
+    @Enumerated(EnumType.STRING)
+    private StatusProposta status;
+
     public Proposta(@NotBlank String nome,
                     @Email @NotBlank String email,
                     @NotBlank String documento,
@@ -59,5 +64,9 @@ public class Proposta {
 
     public Long getId() {
         return this.id;
+    }
+
+    public void atualizarStatus(String resultadoSolicitacao) {
+        this.status = StatusProposta.toEnum(resultadoSolicitacao);
     }
 }

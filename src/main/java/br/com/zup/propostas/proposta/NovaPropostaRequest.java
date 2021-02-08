@@ -1,6 +1,6 @@
 package br.com.zup.propostas.proposta;
 
-import br.com.zup.propostas.compatilhado.validacao.CPFouCNPJ.CPFouCNPJ;
+import br.com.zup.propostas.compartilhado.validacao.CPFouCNPJ.CPFouCNPJ;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;

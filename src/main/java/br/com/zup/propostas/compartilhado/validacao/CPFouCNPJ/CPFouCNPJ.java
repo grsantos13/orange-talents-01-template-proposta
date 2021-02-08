@@ -1,4 +1,4 @@
-package br.com.zup.propostas.compatilhado.validacao.CPFouCNPJ;
+package br.com.zup.propostas.compartilhado.validacao.CPFouCNPJ;
 
 import org.hibernate.validator.constraints.CompositionType;
 import org.hibernate.validator.constraints.ConstraintComposition;
