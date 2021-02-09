@@ -19,13 +19,14 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import java.math.BigDecimal;
+import java.util.UUID;
 
 @Entity
 public class Proposta {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private UUID id;
 
     @NotBlank
     @Column(nullable = false)
@@ -74,8 +75,16 @@ public class Proposta {
 
     }
 
-    public Long getId() {
+    public UUID getId() {
         return this.id;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public StatusProposta getStatus() {
+        return this.status;
     }
 
     public void atualizarStatus(String resultadoSolicitacao) {
@@ -86,6 +95,7 @@ public class Proposta {
     public void associarCartao(CartaoResponse response) {
         Assert.isTrue(this.status.equals(StatusProposta.ELEGIVEL), "Um cartão não pode ser associado a uma proposta não elegível.");
         Assert.isNull(this.cartao, "Já existe um cartão associado.");
-        this.cartao = new Cartao(this, response.getId(), response.getEmitidoEm(),response.getLimite());
+        this.cartao = new Cartao(this, response.getId(), response.getEmitidoEm(), response.getLimite());
     }
+
 }

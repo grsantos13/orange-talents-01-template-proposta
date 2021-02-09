@@ -1,11 +1,8 @@
 package br.com.zup.propostas.cartao;
 
 import br.com.zup.propostas.proposta.Proposta;
-import org.hibernate.validator.constraints.CreditCardNumber;
 
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
@@ -20,19 +17,19 @@ import java.time.LocalDateTime;
 
 @Entity
 public class Cartao {
+
+    /**
+     * Id é gerado pelo sistema de cartões (externo)
+     */
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Pattern(regexp = "[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{4}")
+    private String id;
 
     @Valid
     @NotNull
     @OneToOne
     @JoinColumn(nullable = false)
     private Proposta proposta;
-
-    @NotBlank
-    @Pattern(regexp = "[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{4}")
-    private String number;
 
     @NotNull
     @PastOrPresent
@@ -47,11 +44,11 @@ public class Cartao {
     }
 
     public Cartao(@Valid @NotNull Proposta proposta,
-                  @NotBlank @CreditCardNumber String number,
+                  @NotBlank String number,
                   @NotNull LocalDateTime emitidoEm,
                   @NotNull @Positive BigDecimal limite) {
         this.proposta = proposta;
-        this.number = number;
+        this.id = number;
         this.emitidoEm = emitidoEm;
         this.limite = limite;
     }
