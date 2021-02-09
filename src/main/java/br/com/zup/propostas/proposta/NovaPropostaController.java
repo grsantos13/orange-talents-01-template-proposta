@@ -32,7 +32,6 @@ public class NovaPropostaController {
     }
 
     @PostMapping
-    @Transactional
     public ResponseEntity<?> criarProposta(@RequestBody @Valid NovaPropostaRequest request,
                                            UriComponentsBuilder uriBuilder) {
 
