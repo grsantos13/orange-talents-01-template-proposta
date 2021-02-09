@@ -34,6 +34,18 @@ services:
       POSTGRES_DB: keycloak
       POSTGRES_HOST: postgres
 
+  postgrespropostas:
+    image: 'postgres:alpine'
+    volumes:
+      - postgrespropostas-volume:/var/lib/postgresql/data
+    ports:
+      - 5433:5432
+    environment:
+      POSTGRES_USER: propostas
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: propostas
+      POSTGRES_HOST: postgres
+
   keycloak:
     image: jboss/keycloak
     ports:
@@ -138,3 +150,4 @@ volumes:
   grafana-volume:
   prometheus-volume:
   postgres-volume:
+  postgrespropostas-volume:

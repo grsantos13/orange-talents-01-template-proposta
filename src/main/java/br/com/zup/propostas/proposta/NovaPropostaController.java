@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import javax.transaction.Transactional;
 import javax.validation.Valid;
 import java.net.URI;
 
@@ -41,7 +40,6 @@ public class NovaPropostaController {
             logger.error("Já existe uma proposta para o documento {}", request.getDocumento());
             return ResponseEntity.unprocessableEntity().build();
         }
-
 
         Proposta proposta = request.toModel();
         executor.persist(proposta);
