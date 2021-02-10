@@ -49,6 +49,10 @@ public class AvisoViagem {
     @Column(nullable = false)
     private LocalDateTime momentoAviso = LocalDateTime.now();
 
+    @Deprecated
+    public AvisoViagem() {
+    }
+
     public AvisoViagem(@Valid @NotNull Cartao cartao,
                        @NotBlank String destino,
                        @NotNull @Future LocalDate validoAte,
