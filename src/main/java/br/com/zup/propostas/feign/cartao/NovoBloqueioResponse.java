@@ -2,7 +2,7 @@ package br.com.zup.propostas.feign.cartao;
 
 import java.time.LocalDateTime;
 
-public class BloqueioResponse {
+public class NovoBloqueioResponse {
     private String id;
     private LocalDateTime bloqueadoEm;
     private String sistemaResponsavel;

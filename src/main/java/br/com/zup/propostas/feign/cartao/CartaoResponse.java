@@ -8,7 +8,7 @@ public class CartaoResponse {
     private String id;
     private LocalDateTime emitidoEm;
     private String titular;
-    private List<BloqueioResponse> bloqueios;
+    private List<NovoBloqueioResponse> bloqueios;
     private List<AvisoResponse> avisos;
     private List<CarteiraResponse> carteiras;
     private List<ParcelasResponse> parcelas;
@@ -29,7 +29,7 @@ public class CartaoResponse {
         return titular;
     }
 
-    public List<BloqueioResponse> getBloqueios() {
+    public List<NovoBloqueioResponse> getBloqueios() {
         return bloqueios;
     }
 

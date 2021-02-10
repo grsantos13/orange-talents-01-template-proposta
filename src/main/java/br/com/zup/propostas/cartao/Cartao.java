@@ -2,6 +2,9 @@ package br.com.zup.propostas.cartao;
 
 import br.com.zup.propostas.cartao.biometria.Biometria;
 import br.com.zup.propostas.cartao.bloqueio.Bloqueio;
+import br.com.zup.propostas.cartao.carteira.Carteira;
+import br.com.zup.propostas.cartao.carteira.NovaCarteiraRequest;
+import br.com.zup.propostas.cartao.carteira.TipoCarteira;
 import br.com.zup.propostas.cartao.viagem.AvisoViagem;
 import br.com.zup.propostas.cartao.viagem.NovoAvisoViagemRequest;
 import br.com.zup.propostas.proposta.Proposta;
@@ -18,12 +21,12 @@ import javax.persistence.OneToOne;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.PastOrPresent;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Positive;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 
@@ -61,6 +64,9 @@ public class Cartao {
     @OneToMany(mappedBy = "cartao", cascade = CascadeType.MERGE)
     private List<AvisoViagem> viagens;
 
+    @OneToMany(mappedBy = "cartao", cascade = CascadeType.MERGE)
+    private Set<Carteira> carteiras;
+
     @Deprecated
     public Cartao() {
     }
@@ -87,6 +93,10 @@ public class Cartao {
         return biometrias;
     }
 
+    public Set<Carteira> getCarteiras() {
+        return carteiras;
+    }
+
     public void addBiometria(String biometria) {
         this.biometrias.add(new Biometria(biometria, this));
     }
@@ -99,5 +109,11 @@ public class Cartao {
 
     public void avisarViagem(NovoAvisoViagemRequest request, String ipCliente, String userAgent) {
         this.viagens.add(new AvisoViagem(this, request.getDestino(), request.getValidoAte(), userAgent, ipCliente));
+    }
+
+    public void addCarteira(@Valid NovaCarteiraRequest carteira) {
+        this.carteiras.add(new Carteira(carteira.getEmail(),
+                TipoCarteira.valueOf(carteira.getCarteira().toUpperCase()),
+                this));
     }
 }

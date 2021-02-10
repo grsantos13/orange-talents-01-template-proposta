@@ -1,6 +1,6 @@
 package br.com.zup.propostas.feign.cartao;
 
-public class AvisoViagemResponse {
+public class NovoAvisoResponse {
 
     private String resultado;
 

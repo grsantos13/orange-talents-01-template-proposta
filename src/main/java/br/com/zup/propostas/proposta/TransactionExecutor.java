@@ -23,4 +23,9 @@ public class TransactionExecutor {
         manager.merge(entity);
         return entity;
     }
+
+    @Transactional
+    public <T> void remove(T entity) {
+        manager.remove(entity);
+    }
 }

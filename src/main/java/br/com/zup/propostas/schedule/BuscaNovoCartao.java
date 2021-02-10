@@ -5,6 +5,7 @@ import br.com.zup.propostas.feign.cartao.CartaoResponse;
 import br.com.zup.propostas.proposta.Proposta;
 import br.com.zup.propostas.proposta.StatusProposta;
 import br.com.zup.propostas.proposta.TransactionExecutor;
+import feign.FeignException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -39,10 +40,9 @@ public class BuscaNovoCartao {
                 proposta.associarCartao(response);
                 executor.merge(proposta);
                 logger.info("Cartão associado à proposta {}", proposta.getId());
-            } catch (Exception e) {
+            } catch (FeignException e) {
                 logger.error("Cartão não encontrado para a proposta {}", proposta.getId());
             }
-
         }
     }
 

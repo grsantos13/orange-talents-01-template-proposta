@@ -1,7 +1,7 @@
 package br.com.zup.propostas.cartao.viagem;
 
 import br.com.zup.propostas.cartao.Cartao;
-import br.com.zup.propostas.feign.cartao.AvisoViagemResponse;
+import br.com.zup.propostas.feign.cartao.NovoAvisoResponse;
 import br.com.zup.propostas.feign.cartao.CartaoClient;
 import br.com.zup.propostas.proposta.TransactionExecutor;
 import org.slf4j.Logger;
@@ -55,8 +55,8 @@ public class AvisoViagemController {
         if (userAgent.isBlank())
             throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "User-Agent não encontrado");
 
-        AvisoViagemResponse avisoViagemResponse = cartaoClient.avisarViagem(cartao.getNumero(), request);
-        logger.info("Notificação ao sistema bancário enviada, com resposta {}", avisoViagemResponse.getResultado());
+        NovoAvisoResponse novoAvisoResponse = cartaoClient.avisarViagem(cartao.getNumero(), request);
+        logger.info("Notificação ao sistema bancário enviada, com resposta {}", novoAvisoResponse.getResultado());
         cartao.avisarViagem(request, ipCliente, userAgent);
         executor.merge(cartao);
 
