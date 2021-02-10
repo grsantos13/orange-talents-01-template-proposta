@@ -13,7 +13,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http
             .authorizeRequests(authz -> authz
                     .antMatchers("/propostas").permitAll()
-                    .anyRequest().authenticated()).csrf().disable()
+                    .anyRequest().permitAll()).csrf().disable()
             .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt);
     }
 }

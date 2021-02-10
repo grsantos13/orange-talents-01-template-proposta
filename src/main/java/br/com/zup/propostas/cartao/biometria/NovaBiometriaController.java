@@ -1,4 +1,4 @@
-package br.com.zup.propostas.biometria;
+package br.com.zup.propostas.cartao.biometria;
 
 import br.com.zup.propostas.cartao.Cartao;
 import org.slf4j.Logger;
@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -21,13 +22,14 @@ import java.util.Comparator;
 import java.util.UUID;
 
 @RestController
+@RequestMapping("/cartoes")
 public class NovaBiometriaController {
 
     @PersistenceContext
     private EntityManager manager;
     private Logger logger = LoggerFactory.getLogger(NovaBiometriaController.class);
 
-    @PostMapping("/cartoes/{id}/biometrias")
+    @PostMapping("/{id}/biometrias")
     @Transactional
     public ResponseEntity<?> criaBiometria(@PathVariable("id") UUID id,
                                            @RequestBody @Valid NovaBiometriaRequest request,

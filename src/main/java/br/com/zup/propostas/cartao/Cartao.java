@@ -1,7 +1,11 @@
 package br.com.zup.propostas.cartao;
 
-import br.com.zup.propostas.biometria.Biometria;
+import br.com.zup.propostas.cartao.biometria.Biometria;
+import br.com.zup.propostas.cartao.bloqueio.Bloqueio;
+import br.com.zup.propostas.cartao.viagem.AvisoViagem;
+import br.com.zup.propostas.cartao.viagem.NovoAvisoViagemRequest;
 import br.com.zup.propostas.proposta.Proposta;
+import org.springframework.util.Assert;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -19,6 +23,7 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Positive;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -40,7 +45,6 @@ public class Cartao {
     private String numero;
 
     @NotNull
-    @PastOrPresent
     private LocalDateTime emitidoEm;
 
     @NotNull
@@ -50,6 +54,12 @@ public class Cartao {
     @Valid
     @OneToMany(mappedBy = "cartao", cascade = CascadeType.MERGE)
     private Set<Biometria> biometrias;
+
+    @OneToMany(mappedBy = "cartao", cascade = CascadeType.MERGE)
+    private List<Bloqueio> bloqueios;
+
+    @OneToMany(mappedBy = "cartao", cascade = CascadeType.MERGE)
+    private List<AvisoViagem> viagens;
 
     @Deprecated
     public Cartao() {
@@ -69,11 +79,25 @@ public class Cartao {
         return id;
     }
 
+    public String getNumero() {
+        return numero;
+    }
+
     public Set<Biometria> getBiometrias() {
         return biometrias;
     }
 
     public void addBiometria(String biometria) {
         this.biometrias.add(new Biometria(biometria, this));
+    }
+
+    public void bloquear(@NotBlank String userAgent, @NotBlank String ipCliente) {
+        Assert.notNull(userAgent, "User-Agent não pode ser nulo");
+        Assert.notNull(ipCliente, "IP do Cliente não pode ser nulo");
+        this.bloqueios.add(new Bloqueio(userAgent, ipCliente, this));
+    }
+
+    public void avisarViagem(NovoAvisoViagemRequest request, String ipCliente, String userAgent) {
+        this.viagens.add(new AvisoViagem(this, request.getDestino(), request.getValidoAte(), userAgent, ipCliente));
     }
 }
