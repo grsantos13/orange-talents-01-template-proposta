@@ -4,35 +4,58 @@ import br.com.zup.propostas.compartilhado.transaction.TransactionExecutor;
 import br.com.zup.propostas.feign.analise.AnaliseProposta;
 import br.com.zup.propostas.feign.analise.AnalisePropostaRequest;
 import br.com.zup.propostas.feign.analise.AnalisePropostaResponse;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.web.server.ResponseStatusException;
-import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.test.web.servlet.MockMvc;
 
+import java.math.BigDecimal;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static br.com.zup.propostas.data.TesteDataBuilder.getNovaPropostaRequest;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@ExtendWith(SpringExtension.class)
+@WebMvcTest(controllers = NovaPropostaController.class)
+@AutoConfigureMockMvc
 class NovaPropostaControllerTest {
 
-    private TransactionExecutor executor = Mockito.mock(TransactionExecutor.class);
-    private ImpedeDocumentoIgualValidator validador = Mockito.mock(ImpedeDocumentoIgualValidator.class);
-    private AnaliseProposta analiseProposta = Mockito.mock(AnaliseProposta.class);
-    private NovaPropostaController controller = new NovaPropostaController(executor, validador, analiseProposta);
-    private UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl("http://localhost:8080");
+    @MockBean
+    private TransactionExecutor executor;
+    @MockBean
+    private ImpedeDocumentoIgualValidator validador;
+    @MockBean
+    private AnaliseProposta analiseProposta;
+
+    @Autowired
+    private ObjectMapper mapper;
+
+    @Autowired
+    private MockMvc mvc;
 
     @Test
-    @DisplayName("Deve salvar com sucesso.")
-    public void teste1() {
+    @DisplayName("Deve salvar com sucesso sem restrição.")
+    public void teste1() throws Exception {
         NovaPropostaRequest request = getNovaPropostaRequest();
+        String json = mapper.writeValueAsString(request);
         UUID id = UUID.randomUUID();
 
         Mockito.doAnswer(invocation -> {
@@ -41,51 +64,38 @@ class NovaPropostaControllerTest {
             return proposta;
         }).when(executor).persist(Mockito.any(Proposta.class));
 
-        Mockito.when(validador.documentoEstaValido(request)).thenReturn(true);
+        Mockito.when(validador.documentoEstaValido(Mockito.any(NovaPropostaRequest.class))).thenReturn(true);
         Mockito.when(analiseProposta.analisarProposta(Mockito.any(AnalisePropostaRequest.class))).thenReturn(new AnalisePropostaResponse("44444444444", "Gustavo", "SEM_RESTRICAO", id.toString()));
 
-        ResponseEntity<?> responseEntity = controller.criarProposta(request, uriBuilder);
-        assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
-        assertEquals("http://localhost:8080/propostas/" + id,
-                responseEntity.getHeaders().get("Location").get(0));
-    }
-
-    @Test
-    @DisplayName("Não deve salvar com documento inválido.")
-    public void teste2() {
-        NovaPropostaRequest request = getNovaPropostaRequest();
-        ResponseEntity<?> responseEntity = controller.criarProposta(request, uriBuilder);
-        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, responseEntity.getStatusCode());
-    }
-
-    @Test
-    @DisplayName("Deve salvar proposta com restrição.")
-    public void teste3() {
-        NovaPropostaRequest request = getNovaPropostaRequest();
-        UUID id = UUID.randomUUID();
-
-        Mockito.doAnswer(invocation -> {
-            Proposta proposta = invocation.getArgument(0);
-            ReflectionTestUtils.setField(proposta, "id", id);
-            return proposta;
-        }).when(executor).persist(Mockito.any(Proposta.class));
-
-        Mockito.when(validador.documentoEstaValido(request)).thenReturn(true);
-        Mockito.when(analiseProposta.analisarProposta(Mockito.any(AnalisePropostaRequest.class))).thenThrow(FeignException.UnprocessableEntity.class);
-        ResponseEntity<?> responseEntity = controller.criarProposta(request, uriBuilder);
-        assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
-        assertEquals("http://localhost:8080/propostas/" + id,
-                responseEntity.getHeaders().get("Location").get(0));
+        mvc.perform(post("/propostas")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json))
+                .andExpect(status().isCreated())
+                .andExpect(header().string("Location", "http://localhost/propostas/" + id));
 
         ArgumentCaptor<Proposta> captor = ArgumentCaptor.forClass(Proposta.class);
         Mockito.verify(executor).merge(captor.capture());
-        assertEquals(captor.getValue().getStatus(), StatusProposta.NAO_ELEGIVEL);
+        assertEquals(StatusProposta.ELEGIVEL, captor.getValue().getStatus());
     }
 
     @Test
-    @DisplayName("Deve retornar erro.")
-    public void teste4() {
+    @DisplayName("Deve retornar erro por documento não estar válido.")
+    public void teste2() throws Exception {
         NovaPropostaRequest request = getNovaPropostaRequest();
+        String json = mapper.writeValueAsString(request);
+        UUID id = UUID.randomUUID();
+
+        mvc.perform(post("/propostas")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json))
+                .andExpect(status().isUnprocessableEntity());
+    }
+
+    @ParameterizedTest
+    @MethodSource("generator")
+    @DisplayName("Testa todas as regras de obrigatoriedade de campos.")
+    public void teste3(NovaPropostaRequest request) throws Exception {
+        String json = mapper.writeValueAsString(request);
         UUID id = UUID.randomUUID();
 
         Mockito.doAnswer(invocation -> {
@@ -94,11 +104,76 @@ class NovaPropostaControllerTest {
             return proposta;
         }).when(executor).persist(Mockito.any(Proposta.class));
 
-        Mockito.when(validador.documentoEstaValido(request)).thenReturn(true);
-        Mockito.when(analiseProposta.analisarProposta(Mockito.any(AnalisePropostaRequest.class))).thenThrow(FeignException.class);
-        assertThrows(ResponseStatusException.class, () -> controller.criarProposta(request, uriBuilder));
-        Mockito.verify(executor).remove(Mockito.any(Proposta.class));
+        Mockito.when(validador.documentoEstaValido(Mockito.any(NovaPropostaRequest.class))).thenReturn(true);
+        Mockito.when(analiseProposta.analisarProposta(Mockito.any(AnalisePropostaRequest.class))).thenReturn(new AnalisePropostaResponse("44444444444", "Gustavo", "SEM_RESTRICAO", id.toString()));
+
+        mvc.perform(post("/propostas")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json))
+                .andExpect(status().isBadRequest());
     }
 
+    private static Stream<Arguments> generator() {
+        EnderecoRequest enderecoRequest = new EnderecoRequest("l", "n", "c", "m", "e", "13333333");
+
+        return Stream.of(
+                Arguments.of(new NovaPropostaRequest("", "gustavo@email.com", "44444444444", enderecoRequest, BigDecimal.TEN)),
+                Arguments.of(new NovaPropostaRequest("Gustavo", "", "44444444444", enderecoRequest, BigDecimal.TEN)),
+                Arguments.of(new NovaPropostaRequest("Gustavo", "gustavo", "44444444444", enderecoRequest, BigDecimal.TEN)),
+                Arguments.of(new NovaPropostaRequest("Gustavo", "gustavo@email.com", "", enderecoRequest, BigDecimal.TEN)),
+                Arguments.of(new NovaPropostaRequest("Gustavo", "gustavo@email.com", "44444444444", null, BigDecimal.TEN)),
+                Arguments.of(new NovaPropostaRequest("Gustavo", "gustavo@email.com", "44444444444", enderecoRequest, null))
+        );
+    }
+
+    @Test
+    @DisplayName("Deve salvar com sucesso com restrição.")
+    public void teste4() throws Exception {
+        NovaPropostaRequest request = getNovaPropostaRequest();
+        String json = mapper.writeValueAsString(request);
+        UUID id = UUID.randomUUID();
+
+        Mockito.doAnswer(invocation -> {
+            Proposta proposta = invocation.getArgument(0);
+            ReflectionTestUtils.setField(proposta, "id", id);
+            return proposta;
+        }).when(executor).persist(Mockito.any(Proposta.class));
+
+        Mockito.when(validador.documentoEstaValido(Mockito.any(NovaPropostaRequest.class))).thenReturn(true);
+        Mockito.when(analiseProposta.analisarProposta(Mockito.any(AnalisePropostaRequest.class))).thenThrow(FeignException.UnprocessableEntity.class);
+
+        mvc.perform(post("/propostas")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json))
+                .andExpect(status().isCreated())
+                .andExpect(header().string("Location", "http://localhost/propostas/" + id));
+
+        ArgumentCaptor<Proposta> captor = ArgumentCaptor.forClass(Proposta.class);
+        Mockito.verify(executor).merge(captor.capture());
+        assertEquals(StatusProposta.NAO_ELEGIVEL, captor.getValue().getStatus());
+    }
+
+    @Test
+    @DisplayName("Deve retornar erro ao salvar uma proposta.")
+    public void teste5() throws Exception {
+        NovaPropostaRequest request = getNovaPropostaRequest();
+        String json = mapper.writeValueAsString(request);
+        UUID id = UUID.randomUUID();
+
+        Mockito.doAnswer(invocation -> {
+            Proposta proposta = invocation.getArgument(0);
+            ReflectionTestUtils.setField(proposta, "id", id);
+            return proposta;
+        }).when(executor).persist(Mockito.any(Proposta.class));
+
+        Mockito.when(validador.documentoEstaValido(Mockito.any(NovaPropostaRequest.class))).thenReturn(true);
+        Mockito.when(analiseProposta.analisarProposta(Mockito.any(AnalisePropostaRequest.class))).thenThrow(FeignException.class);
+
+        mvc.perform(post("/propostas")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json))
+                .andExpect(status().isInternalServerError());
+        Mockito.verify(executor).remove(Mockito.any(Proposta.class));
+    }
 
 }
