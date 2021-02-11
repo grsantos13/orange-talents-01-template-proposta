@@ -17,6 +17,20 @@ public class CartaoResponse {
     private VencimentoResponse vencimento;
     private String idProposta;
 
+    public CartaoResponse(String id, LocalDateTime emitidoEm, String titular, List<NovoBloqueioResponse> bloqueios, List<AvisoResponse> avisos, List<CarteiraResponse> carteiras, List<ParcelasResponse> parcelas, BigDecimal limite, RenegociacaoResponse renegociacao, VencimentoResponse vencimento, String idProposta) {
+        this.id = id;
+        this.emitidoEm = emitidoEm;
+        this.titular = titular;
+        this.bloqueios = bloqueios;
+        this.avisos = avisos;
+        this.carteiras = carteiras;
+        this.parcelas = parcelas;
+        this.limite = limite;
+        this.renegociacao = renegociacao;
+        this.vencimento = vencimento;
+        this.idProposta = idProposta;
+    }
+
     public String getId() {
         return id;
     }

@@ -12,17 +12,17 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/propostas")
-public class VerificaPropostaController {
+public class AcompanhaPropostaController {
 
     private TransactionExecutor executor;
 
-    public VerificaPropostaController(TransactionExecutor executor) {
+    public AcompanhaPropostaController(TransactionExecutor executor) {
         this.executor = executor;
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<StatusPropostaResponse> consultar(@PathVariable("id") UUID id) {
+    public ResponseEntity<AcompanhaPropostaResponse> consultar(@PathVariable("id") UUID id) {
         Proposta proposta = executor.find(Proposta.class, id);
-        return ResponseEntity.ok(new StatusPropostaResponse(proposta));
+        return ResponseEntity.ok(new AcompanhaPropostaResponse(proposta));
     }
 }

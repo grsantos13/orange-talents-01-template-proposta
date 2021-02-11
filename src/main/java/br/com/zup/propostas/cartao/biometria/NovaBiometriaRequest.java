@@ -7,6 +7,10 @@ public class NovaBiometriaRequest {
     @NotBlank
     private String digital;
 
+    @Deprecated
+    public NovaBiometriaRequest() {
+    }
+
     public NovaBiometriaRequest(@NotBlank String digital) {
         this.digital = digital;
     }

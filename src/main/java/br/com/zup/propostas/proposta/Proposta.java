@@ -89,6 +89,10 @@ public class Proposta {
         return this.status;
     }
 
+    public Cartao getCartao() {
+        return cartao;
+    }
+
     public void atualizarStatus(String resultadoSolicitacao) {
         Assert.isTrue(this.status == null, "Status da proposta já incluído.");
         this.status = StatusProposta.toEnum(resultadoSolicitacao);

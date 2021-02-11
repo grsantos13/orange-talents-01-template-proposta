@@ -5,12 +5,12 @@ import br.com.zup.propostas.proposta.StatusProposta;
 
 import java.util.UUID;
 
-public class StatusPropostaResponse {
+public class AcompanhaPropostaResponse {
     private UUID id;
     private String nome;
     private StatusProposta status;
 
-    public StatusPropostaResponse(Proposta proposta) {
+    public AcompanhaPropostaResponse(Proposta proposta) {
         this.status = proposta.getStatus();
         this.id = proposta.getId();
         this.nome = proposta.getNome();
