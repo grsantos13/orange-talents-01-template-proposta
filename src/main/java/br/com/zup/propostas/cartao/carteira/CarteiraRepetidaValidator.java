@@ -13,10 +13,10 @@ public class CarteiraRepetidaValidator {
     @PersistenceContext
     private EntityManager manager;
 
-    public boolean carteiraExistente(NovaCarteiraRequest request) {
+    public boolean carteiraValida(NovaCarteiraRequest request) {
         Query query = manager.createQuery(
                 "select 1 from Carteira c where c.emissor = :emissor");
-        query.setParameter("emissor", request.getCarteira());
+        query.setParameter("emissor", TipoCarteira.valueOf(request.getCarteira()));
         List<?> resultList = query.getResultList();
 
         Assert.isTrue(resultList.size() <= 1,

@@ -44,10 +44,8 @@ class NovaPropostaControllerTest {
     private ImpedeDocumentoIgualValidator validador;
     @MockBean
     private AnaliseProposta analiseProposta;
-
     @Autowired
     private ObjectMapper mapper;
-
     @Autowired
     private MockMvc mvc;
 

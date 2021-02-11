@@ -25,6 +25,7 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Positive;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -65,7 +66,7 @@ public class Cartao {
     private List<AvisoViagem> viagens;
 
     @OneToMany(mappedBy = "cartao", cascade = CascadeType.MERGE)
-    private Set<Carteira> carteiras;
+    private Set<Carteira> carteiras = new HashSet<>();
 
     @Deprecated
     public Cartao() {
@@ -115,7 +116,7 @@ public class Cartao {
 
     public void addCarteira(@Valid NovaCarteiraRequest carteira) {
         this.carteiras.add(new Carteira(carteira.getEmail(),
-                TipoCarteira.valueOf(carteira.getCarteira().toUpperCase()),
+                TipoCarteira.valueOf(carteira.getCarteira()),
                 this));
     }
 }

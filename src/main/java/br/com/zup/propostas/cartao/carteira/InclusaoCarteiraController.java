@@ -39,7 +39,7 @@ public class InclusaoCarteiraController {
                                              UriComponentsBuilder uriBuilder) {
         Cartao cartao = executor.find(Cartao.class, id);
 
-        boolean carteiraValida = carteiraRepetidaValidator.carteiraExistente(request);
+        boolean carteiraValida = carteiraRepetidaValidator.carteiraValida(request);
         if (!carteiraValida)
             return ResponseEntity.unprocessableEntity().build();
 

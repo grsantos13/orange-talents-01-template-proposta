@@ -11,9 +11,9 @@ public class NovaCarteiraRequest {
     @NotNull
     private TipoCarteira carteira;
 
-    public NovaCarteiraRequest(@NotBlank String email, @NotBlank String carteira) {
+    public NovaCarteiraRequest(@NotBlank String email, @NotNull TipoCarteira carteira) {
         this.email = email;
-        this.carteira = TipoCarteira.valueOf(carteira);
+        this.carteira = carteira;
     }
 
     public String getEmail() {
@@ -21,6 +21,6 @@ public class NovaCarteiraRequest {
     }
 
     public String getCarteira() {
-        return carteira.getDescription();
+        return carteira.name();
     }
 }
