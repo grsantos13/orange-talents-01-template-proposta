@@ -1,7 +1,5 @@
 package br.com.zup.propostas.cartao.carteira;
 
-import br.com.zup.propostas.compartilhado.validacao.Unique.Unique;
-
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
@@ -11,7 +9,6 @@ public class NovaCarteiraRequest {
     private String email;
 
     @NotNull
-    @Unique(field = "emissor", domainClass = Carteira.class)
     private TipoCarteira carteira;
 
     public NovaCarteiraRequest(@NotBlank String email, @NotBlank String carteira) {

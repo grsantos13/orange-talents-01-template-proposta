@@ -1,21 +1,17 @@
 package br.com.zup.propostas.cartao.viagem;
 
 import br.com.zup.propostas.cartao.Cartao;
-import br.com.zup.propostas.feign.cartao.NovoAvisoResponse;
+import br.com.zup.propostas.compartilhado.transaction.TransactionExecutor;
 import br.com.zup.propostas.feign.cartao.CartaoClient;
-import br.com.zup.propostas.proposta.TransactionExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
-import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.UUID;
@@ -24,13 +20,11 @@ import java.util.UUID;
 @RequestMapping("/cartoes")
 public class AvisoViagemController {
 
-    private EntityManager manager;
     private TransactionExecutor executor;
     private CartaoClient cartaoClient;
     private Logger logger = LoggerFactory.getLogger(AvisoViagemController.class);
 
-    public AvisoViagemController(EntityManager manager, TransactionExecutor executor, CartaoClient cartaoClient) {
-        this.manager = manager;
+    public AvisoViagemController(TransactionExecutor executor, CartaoClient cartaoClient) {
         this.executor = executor;
         this.cartaoClient = cartaoClient;
     }
@@ -39,9 +33,7 @@ public class AvisoViagemController {
     public ResponseEntity<?> avisarViagem(@PathVariable("id") UUID id,
                                           @RequestBody @Valid NovoAvisoViagemRequest request,
                                           HttpServletRequest servletRequest) {
-        Cartao cartao = manager.find(Cartao.class, id);
-        if (cartao == null)
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cartão não encontrado para o id " + id);
+        Cartao cartao = executor.find(Cartao.class, id);
 
         String ipCliente = servletRequest.getRemoteAddr();
         String userAgent = servletRequest.getHeader("User-Agent");
@@ -49,14 +41,12 @@ public class AvisoViagemController {
         logger.info("Aviso de viagem do cartão {} pelo user-agent {}, ip {}",
                 cartao.getId(), userAgent, ipCliente);
 
-        if (ipCliente.isBlank())
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "IP não encontrado.");
+        if (ipCliente.isBlank() || userAgent.isBlank())
+            return ResponseEntity.unprocessableEntity().build();
 
-        if (userAgent.isBlank())
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "User-Agent não encontrado");
+        cartaoClient.avisarViagem(cartao.getNumero(), request);
+        logger.info("Notificação ao sistema bancário enviada");
 
-        NovoAvisoResponse novoAvisoResponse = cartaoClient.avisarViagem(cartao.getNumero(), request);
-        logger.info("Notificação ao sistema bancário enviada, com resposta {}", novoAvisoResponse.getResultado());
         cartao.avisarViagem(request, ipCliente, userAgent);
         executor.merge(cartao);
 

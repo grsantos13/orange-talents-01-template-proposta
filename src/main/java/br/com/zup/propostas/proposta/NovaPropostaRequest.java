@@ -18,8 +18,8 @@ public class NovaPropostaRequest {
     @CPFouCNPJ
     @NotBlank
     private String documento;
-    @NotBlank
-    private String endereco;
+    @NotNull
+    private EnderecoRequest endereco;
     @NotNull
     @Positive
     private BigDecimal salario;
@@ -27,7 +27,7 @@ public class NovaPropostaRequest {
     public NovaPropostaRequest(@NotBlank String nome,
                                @Email @NotBlank String email,
                                @NotBlank String documento,
-                               @NotBlank String endereco,
+                               @NotNull EnderecoRequest endereco,
                                @NotNull @Positive BigDecimal salario) {
         this.nome = nome;
         this.email = email;
@@ -48,7 +48,7 @@ public class NovaPropostaRequest {
         return documento;
     }
 
-    public String getEndereco() {
+    public EnderecoRequest getEndereco() {
         return endereco;
     }
 
@@ -57,6 +57,6 @@ public class NovaPropostaRequest {
     }
 
     public Proposta toModel() {
-        return new Proposta(nome, email, documento, endereco, salario);
+        return new Proposta(nome, email, documento, new Endereco(this.endereco), salario);
     }
 }

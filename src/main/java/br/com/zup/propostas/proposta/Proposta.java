@@ -7,6 +7,7 @@ import org.springframework.util.Assert;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -42,9 +43,10 @@ public class Proposta {
     @Column(nullable = false, unique = true)
     private String documento;
 
-    @NotBlank
+    @NotNull
+    @Embedded
     @Column(nullable = false)
-    private String endereco;
+    private Endereco endereco;
 
     @NotNull
     @Positive
@@ -64,7 +66,7 @@ public class Proposta {
     public Proposta(@NotBlank String nome,
                     @Email @NotBlank String email,
                     @NotBlank String documento,
-                    @NotBlank String endereco,
+                    @NotNull Endereco endereco,
                     @NotNull @Positive BigDecimal salario) {
 
         this.nome = nome;

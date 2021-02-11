@@ -1,4 +1,7 @@
-package br.com.zup.propostas.proposta;
+package br.com.zup.propostas.proposta.acompanhamento;
+
+import br.com.zup.propostas.proposta.Proposta;
+import br.com.zup.propostas.proposta.StatusProposta;
 
 import java.util.UUID;
 

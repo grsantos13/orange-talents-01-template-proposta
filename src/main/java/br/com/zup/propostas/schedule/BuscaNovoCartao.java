@@ -1,10 +1,10 @@
 package br.com.zup.propostas.schedule;
 
+import br.com.zup.propostas.compartilhado.transaction.TransactionExecutor;
 import br.com.zup.propostas.feign.cartao.CartaoClient;
 import br.com.zup.propostas.feign.cartao.CartaoResponse;
 import br.com.zup.propostas.proposta.Proposta;
 import br.com.zup.propostas.proposta.StatusProposta;
-import br.com.zup.propostas.proposta.TransactionExecutor;
 import feign.FeignException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

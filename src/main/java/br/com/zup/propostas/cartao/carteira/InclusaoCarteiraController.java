@@ -1,22 +1,18 @@
 package br.com.zup.propostas.cartao.carteira;
 
 import br.com.zup.propostas.cartao.Cartao;
+import br.com.zup.propostas.compartilhado.transaction.TransactionExecutor;
 import br.com.zup.propostas.feign.cartao.CartaoClient;
-import br.com.zup.propostas.feign.cartao.NovaCarteiraResponse;
-import br.com.zup.propostas.proposta.TransactionExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import javax.persistence.EntityManager;
 import javax.validation.Valid;
 import java.net.URI;
 import java.util.Comparator;
@@ -26,27 +22,30 @@ import java.util.UUID;
 @RequestMapping("/cartoes")
 public class InclusaoCarteiraController {
 
-    private EntityManager manager;
     private TransactionExecutor executor;
     private CartaoClient cartaoClient;
+    private CarteiraRepetidaValidator carteiraRepetidaValidator;
     private Logger logger = LoggerFactory.getLogger(InclusaoCarteiraController.class);
 
-    public InclusaoCarteiraController(EntityManager manager, TransactionExecutor executor, CartaoClient cartaoClient) {
-        this.manager = manager;
+    public InclusaoCarteiraController(TransactionExecutor executor, CartaoClient cartaoClient, CarteiraRepetidaValidator carteiraRepetidaValidator) {
         this.executor = executor;
         this.cartaoClient = cartaoClient;
+        this.carteiraRepetidaValidator = carteiraRepetidaValidator;
     }
 
     @PostMapping("/{id}/carteiras")
     public ResponseEntity<?> incluirCarteira(@PathVariable("id") UUID id,
                                              @RequestBody @Valid NovaCarteiraRequest request,
                                              UriComponentsBuilder uriBuilder) {
-        Cartao cartao = manager.find(Cartao.class, id);
-        if (cartao == null)
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cartão não encontrado para o id " + id);
+        Cartao cartao = executor.find(Cartao.class, id);
+
+        boolean carteiraValida = carteiraRepetidaValidator.carteiraExistente(request);
+        if (!carteiraValida)
+            return ResponseEntity.unprocessableEntity().build();
 
         logger.info("Iniciando criação de carteira para o cartão {}", cartao.getId());
-        NovaCarteiraResponse carteiraResponse = cartaoClient.incluirCarteira(cartao.getNumero(), request);
+
+        cartaoClient.incluirCarteira(cartao.getNumero(), request);
         cartao.addCarteira(request);
         executor.merge(cartao);
 

@@ -107,7 +107,9 @@ public class Cartao {
         this.bloqueios.add(new Bloqueio(userAgent, ipCliente, this));
     }
 
-    public void avisarViagem(NovoAvisoViagemRequest request, String ipCliente, String userAgent) {
+    public void avisarViagem(@NotNull NovoAvisoViagemRequest request, @NotBlank String ipCliente, @NotBlank String userAgent) {
+        Assert.notNull(userAgent, "User-Agent não pode ser nulo");
+        Assert.notNull(ipCliente, "IP do Cliente não pode ser nulo");
         this.viagens.add(new AvisoViagem(this, request.getDestino(), request.getValidoAte(), userAgent, ipCliente));
     }
 

@@ -1,5 +1,6 @@
 package br.com.zup.propostas.proposta;
 
+import br.com.zup.propostas.compartilhado.transaction.TransactionExecutor;
 import br.com.zup.propostas.feign.analise.AnaliseProposta;
 import br.com.zup.propostas.feign.analise.AnalisePropostaRequest;
 import br.com.zup.propostas.feign.analise.AnalisePropostaResponse;
@@ -53,12 +54,12 @@ public class NovaPropostaController {
         try {
             AnalisePropostaResponse analiseProposta = this.analiseProposta.analisarProposta(propostaRequest);
             proposta.atualizarStatus(analiseProposta.getResultadoSolicitacao());
-        }catch (FeignException.UnprocessableEntity e){
+        } catch (FeignException.UnprocessableEntity e) {
             proposta.atualizarStatus("COM_RESTRICAO");
-        }catch (FeignException e){
-            logger.error("Ocorreu o erro " + e.getMessage() + " ao buscar a solicitação. Tente novamente.");
+        } catch (FeignException e) {
+            logger.error("Ocorreu o erro " + e.getMessage() + " ao analisar a solicitação. Tente novamente.");
             executor.remove(proposta);
-            throw new ResponseStatusException(HttpStatus.valueOf(e.status()), e.getLocalizedMessage());
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         executor.merge(proposta);
