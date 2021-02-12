@@ -4,6 +4,10 @@ public class SolicitacaoBloqueioResponse {
 
     private String resultado;
 
+    @Deprecated
+    public SolicitacaoBloqueioResponse() {
+    }
+
     public SolicitacaoBloqueioResponse(String resultado) {
         this.resultado = resultado;
     }
