@@ -1,10 +1,12 @@
 package br.com.zup.propostas.cartao.carteira;
 
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 public class NovaCarteiraRequest {
 
+    @Email
     @NotBlank
     private String email;
 
@@ -21,6 +23,6 @@ public class NovaCarteiraRequest {
     }
 
     public String getCarteira() {
-        return carteira.name();
+            return carteira.name();
     }
 }
