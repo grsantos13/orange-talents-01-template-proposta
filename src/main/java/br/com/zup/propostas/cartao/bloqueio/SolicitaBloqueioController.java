@@ -4,6 +4,8 @@ import br.com.zup.propostas.cartao.Cartao;
 import br.com.zup.propostas.compartilhado.transaction.TransactionExecutor;
 import br.com.zup.propostas.feign.cartao.CartaoClient;
 import br.com.zup.propostas.feign.cartao.SolicitacaoBloqueioResponse;
+import io.opentracing.Span;
+import io.opentracing.Tracer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -22,15 +24,21 @@ public class SolicitaBloqueioController {
     private Logger logger = LoggerFactory.getLogger(SolicitaBloqueioController.class);
     private TransactionExecutor executor;
     private CartaoClient cartaoClient;
+    private Tracer tracer;
 
-    public SolicitaBloqueioController(TransactionExecutor executor, CartaoClient cartaoClient) {
+    public SolicitaBloqueioController(TransactionExecutor executor, CartaoClient cartaoClient, Tracer tracer) {
         this.executor = executor;
         this.cartaoClient = cartaoClient;
+        this.tracer = tracer;
     }
 
     @PostMapping("/{id}/bloqueios")
     public ResponseEntity<?> solicitarBloqueio(@PathVariable("id") UUID id, HttpServletRequest request) {
         Cartao cartao = executor.find(Cartao.class, id);
+
+        Span span = tracer.activeSpan();
+        span.setTag("Solicitante", cartao.getProposta().getEmail());
+
 
         String ipCliente = request.getRemoteAddr();
         String userAgent = request.getHeader("User-Agent");

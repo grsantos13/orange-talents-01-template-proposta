@@ -5,6 +5,8 @@ import br.com.zup.propostas.feign.analise.AnaliseProposta;
 import br.com.zup.propostas.feign.analise.AnalisePropostaRequest;
 import br.com.zup.propostas.feign.analise.AnalisePropostaResponse;
 import feign.FeignException;
+import io.opentracing.Span;
+import io.opentracing.Tracer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -27,16 +29,21 @@ public class NovaPropostaController {
     private TransactionExecutor executor;
     private ImpedeDocumentoIgualValidator validador;
     private AnaliseProposta analiseProposta;
+    private Tracer tracer;
 
-    public NovaPropostaController(TransactionExecutor executor, ImpedeDocumentoIgualValidator validador, AnaliseProposta analiseProposta) {
+    public NovaPropostaController(TransactionExecutor executor, ImpedeDocumentoIgualValidator validador, AnaliseProposta analiseProposta, Tracer tracer) {
         this.executor = executor;
         this.validador = validador;
         this.analiseProposta = analiseProposta;
+        this.tracer = tracer;
     }
 
     @PostMapping
     public ResponseEntity<?> criarProposta(@RequestBody @Valid NovaPropostaRequest request,
                                            UriComponentsBuilder uriBuilder) {
+
+        Span span = tracer.activeSpan();
+        span.setTag("Solicitante", request.getEmail());
 
         boolean documentoValido = validador.documentoEstaValido(request);
 

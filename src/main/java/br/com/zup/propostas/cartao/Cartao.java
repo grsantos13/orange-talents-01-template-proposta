@@ -88,6 +88,10 @@ public class Cartao {
         return id;
     }
 
+    public Proposta getProposta() {
+        return proposta;
+    }
+
     public String getNumero() {
         return numero;
     }

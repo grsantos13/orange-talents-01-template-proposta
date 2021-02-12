@@ -3,6 +3,8 @@ package br.com.zup.propostas.cartao.carteira;
 import br.com.zup.propostas.cartao.Cartao;
 import br.com.zup.propostas.compartilhado.transaction.TransactionExecutor;
 import br.com.zup.propostas.feign.cartao.CartaoClient;
+import io.opentracing.Span;
+import io.opentracing.Tracer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -25,12 +27,14 @@ public class InclusaoCarteiraController {
     private TransactionExecutor executor;
     private CartaoClient cartaoClient;
     private CarteiraRepetidaValidator carteiraRepetidaValidator;
+    private Tracer tracer;
     private Logger logger = LoggerFactory.getLogger(InclusaoCarteiraController.class);
 
-    public InclusaoCarteiraController(TransactionExecutor executor, CartaoClient cartaoClient, CarteiraRepetidaValidator carteiraRepetidaValidator) {
+    public InclusaoCarteiraController(TransactionExecutor executor, CartaoClient cartaoClient, CarteiraRepetidaValidator carteiraRepetidaValidator, Tracer tracer) {
         this.executor = executor;
         this.cartaoClient = cartaoClient;
         this.carteiraRepetidaValidator = carteiraRepetidaValidator;
+        this.tracer = tracer;
     }
 
     @PostMapping("/{id}/carteiras")
@@ -38,6 +42,10 @@ public class InclusaoCarteiraController {
                                              @RequestBody @Valid NovaCarteiraRequest request,
                                              UriComponentsBuilder uriBuilder) {
         Cartao cartao = executor.find(Cartao.class, id);
+
+
+        Span span = tracer.activeSpan();
+        span.setTag("Solicitante", cartao.getProposta().getEmail());
 
         boolean carteiraValida = carteiraRepetidaValidator.carteiraValida(request);
         if (!carteiraValida)
