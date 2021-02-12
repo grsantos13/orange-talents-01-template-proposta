@@ -10,10 +10,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+
         http
             .authorizeRequests(authz -> authz
                     .antMatchers("/propostas").permitAll()
                     .anyRequest().permitAll()).csrf().disable()
+                    .headers().frameOptions().sameOrigin().and()
             .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt);
     }
 }

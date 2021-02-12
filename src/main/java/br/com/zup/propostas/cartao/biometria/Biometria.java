@@ -36,8 +36,8 @@ public class Biometria {
     public Biometria() {
     }
 
-    public Biometria(String biometria, Cartao cartao) {
-        this.biometria = Base64.getEncoder().encode(biometria.getBytes());
+    public Biometria(byte[] biometria, Cartao cartao) {
+        this.biometria = biometria;
         this.cartao = cartao;
     }
 

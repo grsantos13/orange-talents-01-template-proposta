@@ -17,6 +17,9 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import javax.transaction.Transactional;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -49,9 +52,8 @@ class NovaBiometriaControllerTest {
     @Test
     @DisplayName("Deve criar a biometria com sucesso.")
     void teste1() throws Exception {
-        NovaBiometriaRequest request = new NovaBiometriaRequest("digital1234");
+        NovaBiometriaRequest request = new NovaBiometriaRequest(Base64.getEncoder().encode("Digital123".getBytes()));
         String json = mapper.writeValueAsString(request);
-
         mvc.perform(post("/cartoes/{id}/biometrias", cartao.getId())
         .contentType(MediaType.APPLICATION_JSON).content(json))
         .andExpect(status().isCreated());
@@ -60,7 +62,7 @@ class NovaBiometriaControllerTest {
     @Test
     @DisplayName("Deve retornar bad request por ter campo nulo.")
     void teste2() throws Exception {
-        NovaBiometriaRequest request = new NovaBiometriaRequest("");
+        NovaBiometriaRequest request = new NovaBiometriaRequest(null);
         String json = mapper.writeValueAsString(request);
 
         mvc.perform(post("/cartoes/{id}/biometrias", cartao.getId())

@@ -1,21 +1,21 @@
 package br.com.zup.propostas.cartao.biometria;
 
-import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 public class NovaBiometriaRequest {
 
-    @NotBlank
-    private String digital;
+    @NotNull
+    private byte[] digital;
 
     @Deprecated
     public NovaBiometriaRequest() {
     }
 
-    public NovaBiometriaRequest(@NotBlank String digital) {
+    public NovaBiometriaRequest(@NotNull byte[] digital) {
         this.digital = digital;
     }
 
-    public String getDigital() {
+    public byte[] getDigital() {
         return digital;
     }
 }

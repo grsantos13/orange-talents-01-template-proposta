@@ -108,7 +108,7 @@ public class Cartao {
         return carteiras;
     }
 
-    public void addBiometria(String biometria) {
+    public void addBiometria(byte[] biometria) {
         this.biometrias.add(new Biometria(biometria, this));
     }
 
