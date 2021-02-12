@@ -57,7 +57,7 @@ public class Cartao {
 
     @Valid
     @OneToMany(mappedBy = "cartao", cascade = CascadeType.MERGE)
-    private Set<Biometria> biometrias;
+    private Set<Biometria> biometrias = new HashSet<>();
 
     @OneToMany(mappedBy = "cartao", cascade = CascadeType.MERGE)
     private List<Bloqueio> bloqueios;

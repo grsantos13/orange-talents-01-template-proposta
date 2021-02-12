@@ -1,19 +1,16 @@
-package br.com.zup.propostas.cartao.carteira;
+package br.com.zup.propostas.cartao.biometria;
 
 import br.com.zup.propostas.cartao.Cartao;
 import br.com.zup.propostas.compartilhado.transaction.TransactionExecutor;
 import br.com.zup.propostas.data.TesteDataBuilder;
-import br.com.zup.propostas.feign.cartao.CartaoClient;
 import br.com.zup.propostas.proposta.Proposta;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -24,18 +21,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class InclusaoCarteiraControllerTest {
+@Transactional
+class NovaBiometriaControllerTest {
 
     @Autowired
     private TransactionExecutor executor;
-    @MockBean
-    private CartaoClient cartaoClient;
-    @Autowired
-    private CarteiraRepetidaValidator carteiraRepetidaValidator;
-    @Autowired
-    private MockMvc mvc;
+
     @Autowired
     private ObjectMapper mapper;
+
+    @Autowired
+    private MockMvc mvc;
 
     private Proposta proposta;
     private Cartao cartao;
@@ -49,30 +45,25 @@ class InclusaoCarteiraControllerTest {
     }
 
     @Test
-    @DisplayName("Deve salvar uma carteira com sucesso.")
-    @Transactional
+    @DisplayName("Deve criar a biometria com sucesso.")
     void teste1() throws Exception {
-        NovaCarteiraRequest request = TesteDataBuilder.getNovaCarteiraRequest(TipoCarteira.PAYPAL);
+        NovaBiometriaRequest request = new NovaBiometriaRequest("digital1234");
         String json = mapper.writeValueAsString(request);
-        Mockito.when(cartaoClient.incluirCarteira(Mockito.any(String.class), Mockito.any(NovaCarteiraRequest.class))).thenReturn(null);
 
-        mvc.perform(post("/cartoes/{id}/carteiras", cartao.getId())
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(json)).andExpect(status().isCreated());
+        mvc.perform(post("/cartoes/{id}/biometrias", cartao.getId())
+        .contentType(MediaType.APPLICATION_JSON).content(json))
+        .andExpect(status().isCreated());
     }
 
     @Test
-    @DisplayName("Não deve salvar uma carteira já existente.")
-    @Transactional
+    @DisplayName("Deve retornar bad request por ter campo nulo.")
     void teste2() throws Exception {
-        NovaCarteiraRequest request = TesteDataBuilder.getNovaCarteiraRequest(TipoCarteira.PAYPAL);
-        cartao.addCarteira(request);
-        executor.merge(cartao);
+        NovaBiometriaRequest request = new NovaBiometriaRequest("");
         String json = mapper.writeValueAsString(request);
-        Mockito.when(cartaoClient.incluirCarteira(Mockito.any(String.class), Mockito.any(NovaCarteiraRequest.class))).thenReturn(null);
 
-        mvc.perform(post("/cartoes/{id}/carteiras", cartao.getId())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(json)).andExpect(status().isUnprocessableEntity());
+        mvc.perform(post("/cartoes/{id}/biometrias", cartao.getId())
+                .contentType(MediaType.APPLICATION_JSON).content(json))
+                .andExpect(status().isBadRequest());
     }
+
 }
