@@ -38,7 +38,10 @@ public class SolicitaBloqueioController {
         logger.info("Tentativa de bloqueio do cartão {} pelo user-agent {}, ip {}",
                 cartao.getId(), userAgent, ipCliente);
 
-        if (ipCliente.isBlank() || userAgent.isBlank())
+        if (ipCliente == null || userAgent == null)
+            return ResponseEntity.unprocessableEntity().build();
+
+        if (cartao.estaBloqueado())
             return ResponseEntity.unprocessableEntity().build();
 
         SolicitacaoBloqueioResponse bloqueioResponse = cartaoClient.bloquearCartao(cartao.getNumero(),

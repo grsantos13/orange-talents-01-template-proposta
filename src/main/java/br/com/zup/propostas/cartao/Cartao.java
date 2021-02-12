@@ -2,6 +2,7 @@ package br.com.zup.propostas.cartao;
 
 import br.com.zup.propostas.cartao.biometria.Biometria;
 import br.com.zup.propostas.cartao.bloqueio.Bloqueio;
+import br.com.zup.propostas.cartao.bloqueio.StatusBloqueio;
 import br.com.zup.propostas.cartao.carteira.Carteira;
 import br.com.zup.propostas.cartao.carteira.NovaCarteiraRequest;
 import br.com.zup.propostas.cartao.carteira.TipoCarteira;
@@ -25,6 +26,7 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Positive;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -60,10 +62,10 @@ public class Cartao {
     private Set<Biometria> biometrias = new HashSet<>();
 
     @OneToMany(mappedBy = "cartao", cascade = CascadeType.MERGE)
-    private List<Bloqueio> bloqueios;
+    private List<Bloqueio> bloqueios = new ArrayList<>();
 
     @OneToMany(mappedBy = "cartao", cascade = CascadeType.MERGE)
-    private List<AvisoViagem> viagens;
+    private List<AvisoViagem> viagens = new ArrayList<>();
 
     @OneToMany(mappedBy = "cartao", cascade = CascadeType.MERGE)
     private Set<Carteira> carteiras = new HashSet<>();
@@ -94,6 +96,10 @@ public class Cartao {
         return biometrias;
     }
 
+    public List<Bloqueio> getBloqueios() {
+        return bloqueios;
+    }
+
     public Set<Carteira> getCarteiras() {
         return carteiras;
     }
@@ -118,5 +124,12 @@ public class Cartao {
         this.carteiras.add(new Carteira(carteira.getEmail(),
                 TipoCarteira.valueOf(carteira.getCarteira()),
                 this));
+    }
+
+    public boolean estaBloqueado() {
+        if (this.bloqueios.isEmpty())
+            return false;
+
+        return this.bloqueios.get(this.bloqueios.size() - 1).getStatus().equals(StatusBloqueio.BLOQUEADO);
     }
 }
