@@ -1,11 +1,13 @@
 package br.com.zup.propostas.proposta;
 
 import br.com.zup.propostas.compartilhado.transaction.TransactionExecutor;
+import br.com.zup.propostas.data.TesteDataBuilder;
 import br.com.zup.propostas.feign.analise.AnaliseProposta;
 import br.com.zup.propostas.feign.analise.AnalisePropostaRequest;
 import br.com.zup.propostas.feign.analise.AnalisePropostaResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
+import io.opentracing.Tracer;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,6 +21,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
@@ -36,6 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(controllers = NovaPropostaController.class)
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 class NovaPropostaControllerTest {
 
     @MockBean
@@ -48,14 +52,16 @@ class NovaPropostaControllerTest {
     private ObjectMapper mapper;
     @Autowired
     private MockMvc mvc;
+    @MockBean
+    private Tracer tracer;
 
     @Test
     @DisplayName("Deve salvar com sucesso sem restrição.")
     public void teste1() throws Exception {
+        Mockito.when(tracer.activeSpan()).thenReturn(TesteDataBuilder.getSpan());
         NovaPropostaRequest request = getNovaPropostaRequest();
         String json = mapper.writeValueAsString(request);
         UUID id = UUID.randomUUID();
-
         Mockito.doAnswer(invocation -> {
             Proposta proposta = invocation.getArgument(0);
             ReflectionTestUtils.setField(proposta, "id", id);
@@ -82,6 +88,8 @@ class NovaPropostaControllerTest {
         NovaPropostaRequest request = getNovaPropostaRequest();
         String json = mapper.writeValueAsString(request);
         UUID id = UUID.randomUUID();
+
+        Mockito.when(tracer.activeSpan()).thenReturn(TesteDataBuilder.getSpan());
 
         mvc.perform(post("/propostas")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -137,6 +145,7 @@ class NovaPropostaControllerTest {
             return proposta;
         }).when(executor).persist(Mockito.any(Proposta.class));
 
+        Mockito.when(tracer.activeSpan()).thenReturn(TesteDataBuilder.getSpan());
         Mockito.when(validador.documentoEstaValido(Mockito.any(NovaPropostaRequest.class))).thenReturn(true);
         Mockito.when(analiseProposta.analisarProposta(Mockito.any(AnalisePropostaRequest.class))).thenThrow(FeignException.UnprocessableEntity.class);
 
@@ -164,6 +173,7 @@ class NovaPropostaControllerTest {
             return proposta;
         }).when(executor).persist(Mockito.any(Proposta.class));
 
+        Mockito.when(tracer.activeSpan()).thenReturn(TesteDataBuilder.getSpan());
         Mockito.when(validador.documentoEstaValido(Mockito.any(NovaPropostaRequest.class))).thenReturn(true);
         Mockito.when(analiseProposta.analisarProposta(Mockito.any(AnalisePropostaRequest.class))).thenThrow(FeignException.class);
 
