@@ -41,7 +41,7 @@ public class AvisoViagemController {
         logger.info("Aviso de viagem do cartão {} pelo user-agent {}, ip {}",
                 cartao.getId(), userAgent, ipCliente);
 
-        if (ipCliente.isBlank() || userAgent.isBlank())
+        if (ipCliente == null|| userAgent == null)
             return ResponseEntity.unprocessableEntity().build();
 
         cartaoClient.avisarViagem(cartao.getNumero(), request);

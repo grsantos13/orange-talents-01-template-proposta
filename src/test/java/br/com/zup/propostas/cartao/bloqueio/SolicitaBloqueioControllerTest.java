@@ -7,6 +7,7 @@ import br.com.zup.propostas.feign.cartao.CartaoClient;
 import br.com.zup.propostas.feign.cartao.SolicitacaoBloqueioResponse;
 import br.com.zup.propostas.proposta.Proposta;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.FeignException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -91,6 +92,18 @@ class SolicitaBloqueioControllerTest {
         Mockito.when(executor.find(Mockito.any(), Mockito.any(UUID.class))).thenReturn(cartao);
         Mockito.when(cartaoClient.bloquearCartao(Mockito.any(String.class),
                 Mockito.any(NovoBloqueioRequest.class))).thenReturn(new SolicitacaoBloqueioResponse("CRIADO"));
+
+        mvc.perform(post("/cartoes/{id}/bloqueios", cartao.getId()))
+                .andExpect(status().isUnprocessableEntity());
+        Mockito.verify(executor, Mockito.never()).merge(Mockito.any(Cartao.class));
+    }
+
+    @Test
+    @DisplayName("Não deve bloquear o cartão por ter o retorno de um erro no Feign")
+    void teste4() throws Exception {
+        Mockito.when(executor.find(Mockito.any(), Mockito.any(UUID.class))).thenReturn(cartao);
+        Mockito.when(cartaoClient.bloquearCartao(Mockito.any(String.class),
+                Mockito.any(NovoBloqueioRequest.class))).thenThrow(FeignException.class);
 
         mvc.perform(post("/cartoes/{id}/bloqueios", cartao.getId()))
                 .andExpect(status().isUnprocessableEntity());

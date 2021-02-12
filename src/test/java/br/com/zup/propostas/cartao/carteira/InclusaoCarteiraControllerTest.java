@@ -20,7 +20,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -32,6 +34,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class InclusaoCarteiraControllerTest {
 
     @Autowired
+    private EntityManager manager;
+    @MockBean
     private TransactionExecutor executor;
     @MockBean
     private CartaoClient cartaoClient;
@@ -48,9 +52,9 @@ class InclusaoCarteiraControllerTest {
     @BeforeEach
     public void setup() {
         proposta = TesteDataBuilder.getNovaPropostaRequest().toModel();
-        executor.persist(proposta);
+        manager.persist(proposta);
         cartao = TesteDataBuilder.getCartao(proposta);
-        executor.persist(cartao);
+        manager.persist(cartao);
     }
 
     @Test
@@ -58,6 +62,8 @@ class InclusaoCarteiraControllerTest {
     void teste1() throws Exception {
         NovaCarteiraRequest request = TesteDataBuilder.getNovaCarteiraRequest(TipoCarteira.PAYPAL);
         String json = mapper.writeValueAsString(request);
+
+        Mockito.when(executor.find(Mockito.any(), Mockito.any(UUID.class))).thenReturn(cartao);
         Mockito.when(cartaoClient.incluirCarteira(Mockito.any(String.class), Mockito.any(NovaCarteiraRequest.class))).thenReturn(null);
 
         mvc.perform(post("/cartoes/{id}/carteiras", cartao.getId())
@@ -70,7 +76,7 @@ class InclusaoCarteiraControllerTest {
     void teste2() throws Exception {
         NovaCarteiraRequest request = TesteDataBuilder.getNovaCarteiraRequest(TipoCarteira.PAYPAL);
         cartao.addCarteira(request);
-        executor.merge(cartao);
+        manager.merge(cartao);
         String json = mapper.writeValueAsString(request);
         Mockito.when(cartaoClient.incluirCarteira(Mockito.any(String.class), Mockito.any(NovaCarteiraRequest.class))).thenReturn(null);
 

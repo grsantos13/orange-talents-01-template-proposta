@@ -1,5 +1,7 @@
 package br.com.zup.propostas.cartao.viagem;
 
+import org.springframework.util.Assert;
+
 import javax.validation.constraints.Future;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -14,7 +16,11 @@ public class NovoAvisoViagemRequest {
     @Future
     private LocalDate validoAte;
 
-    public NovoAvisoViagemRequest(String destino, LocalDate validoAte) {
+
+    public NovoAvisoViagemRequest(@NotBlank String destino,
+                                  @NotNull @Future LocalDate validoAte) {
+        Assert.notNull(destino, "Destino não pode ser nulo.");
+        Assert.isTrue(validoAte.isAfter(LocalDate.now()), "A validade da viagem precisa ser no futuro.");
         this.destino = destino;
         this.validoAte = validoAte;
     }
