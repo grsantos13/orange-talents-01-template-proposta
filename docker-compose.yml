@@ -105,6 +105,33 @@ services:
       KAFKA_HOST: "kafka:29092"
       JAEGER_ENDPOINT: http://jaeger:14268/api/traces
 
+  propostas:
+    build:
+      dockerfile: ./Dockerfile
+      context: .
+    image: gustavosantoszup/propostas
+    ports:
+      - 8080:8080
+    depends_on:
+      - postgrespropostas
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_HOST: postgrespropostas
+      DB_PORT: 5432
+      DB_NAME: propostas
+      DB_USERNAME: propostas
+      DB_PASSWORD: password
+      NOME_DA_APLICACAO: Serviço de Propostas
+      AMBIENTE: Produção
+      JAEGER_ENABLED: 1
+      JAEGER_ENDPOINT: http://jaeger:14268/api/traces
+      JAEGER_SAMPLER: 1
+      URL_ANALISE_PROPOSTA: http://analise:9999
+      URL_SISTEMA_CARTAO: http://contas:8888/api/cartoes
+      PERIODICIDADE_ASSOCIA_CARTAO_PROPOSTA: 6000
+      KEYCLOAK_ISSUER_URI: http://keycloak:18080/auth/realms/nosso-cartao
+      KEYCLOAK_JWKS_URI: http://keycloak:18080/auth/realms/nosso-cartao/protocol/openid-connect/certs
+
   jaeger:
     image: jaegertracing/all-in-one
     ports:
