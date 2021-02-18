@@ -3,6 +3,7 @@ package br.com.zup.propostas.proposta;
 import br.com.zup.propostas.cartao.Cartao;
 import br.com.zup.propostas.compartilhado.validacao.CPFouCNPJ.CPFouCNPJ;
 import br.com.zup.propostas.feign.cartao.CartaoResponse;
+import org.hibernate.annotations.ColumnTransformer;
 import org.springframework.util.Assert;
 
 import javax.persistence.CascadeType;
@@ -40,7 +41,11 @@ public class Proposta {
 
     @CPFouCNPJ
     @NotBlank
-    @Column(nullable = false, unique = true)
+    @Column(name = "documento", nullable = false, unique = true, columnDefinition = "bytea")
+    @ColumnTransformer(forColumn = "documento",
+            read = "pgp_sym_decrypt(documento, current_setting('encrypt.key'))",
+            write = "pgp_sym_encrypt(?, current_setting('encrypt.key'))"
+    )
     private String documento;
 
     @NotNull
