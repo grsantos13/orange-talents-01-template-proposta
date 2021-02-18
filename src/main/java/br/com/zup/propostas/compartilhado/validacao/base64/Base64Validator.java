@@ -12,7 +12,7 @@ public class Base64Validator implements ConstraintValidator<Base64, String> {
         if (value == null)
             return true;
 
-        return isBase64(value);
+        return value.matches("^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{4})$");
     }
 
 }

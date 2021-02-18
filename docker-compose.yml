@@ -129,8 +129,8 @@ services:
       URL_ANALISE_PROPOSTA: http://analise:9999
       URL_SISTEMA_CARTAO: http://contas:8888/api/cartoes
       PERIODICIDADE_ASSOCIA_CARTAO_PROPOSTA: 6000
-      KEYCLOAK_ISSUER_URI: http://keycloak:18080/auth/realms/nosso-cartao
-      KEYCLOAK_JWKS_URI: http://keycloak:18080/auth/realms/nosso-cartao/protocol/openid-connect/certs
+      KEYCLOAK_ISSUER_URI: http://keycloak:8080/auth/realms/nosso-cartao
+      KEYCLOAK_JWKS_URI: http://keycloak:8080/auth/realms/nosso-cartao/protocol/openid-connect/certs
 
   jaeger:
     image: jaegertracing/all-in-one
