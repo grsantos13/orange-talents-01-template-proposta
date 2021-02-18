@@ -1,5 +1,6 @@
 package br.com.zup.propostas.proposta;
 
+import br.com.zup.propostas.compartilhado.exception.ApiErrors;
 import br.com.zup.propostas.compartilhado.transaction.TransactionExecutor;
 import br.com.zup.propostas.feign.analise.AnaliseProposta;
 import br.com.zup.propostas.feign.analise.AnalisePropostaRequest;
@@ -49,7 +50,8 @@ public class NovaPropostaController {
 
         if (!documentoValido) {
             logger.error("Já existe uma proposta para o documento {}", request.getDocumento());
-            return ResponseEntity.unprocessableEntity().build();
+            return ResponseEntity.unprocessableEntity().body(new ApiErrors("documento",
+                    "Proposta existente para o documento " + request.getDocumento()));
         }
 
         Proposta proposta = request.toModel();

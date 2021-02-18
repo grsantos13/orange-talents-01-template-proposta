@@ -1,6 +1,7 @@
 package br.com.zup.propostas.cartao.bloqueio;
 
 import br.com.zup.propostas.cartao.Cartao;
+import br.com.zup.propostas.compartilhado.exception.ApiErrors;
 import br.com.zup.propostas.compartilhado.transaction.TransactionExecutor;
 import br.com.zup.propostas.feign.cartao.CartaoClient;
 import br.com.zup.propostas.feign.cartao.SolicitacaoBloqueioResponse;
@@ -39,18 +40,16 @@ public class SolicitaBloqueioController {
         Span span = tracer.activeSpan();
         span.setTag("Solicitante", cartao.getProposta().getEmail());
 
-
         String ipCliente = request.getRemoteAddr();
         String userAgent = request.getHeader("User-Agent");
+        if (ipCliente == null || userAgent == null)
+            return ResponseEntity.unprocessableEntity().body(new ApiErrors("IP ou header User-Agent não encontrados."));
 
         logger.info("Tentativa de bloqueio do cartão {} pelo user-agent {}, ip {}",
                 cartao.getId(), userAgent, ipCliente);
 
-        if (ipCliente == null || userAgent == null)
-            return ResponseEntity.unprocessableEntity().build();
-
         if (cartao.estaBloqueado())
-            return ResponseEntity.unprocessableEntity().build();
+            return ResponseEntity.unprocessableEntity().body(new ApiErrors("Cartão " + cartao.getId() + " já está bloqueado."));
 
         SolicitacaoBloqueioResponse bloqueioResponse = cartaoClient.bloquearCartao(cartao.getNumero(),
                 new NovoBloqueioRequest("Propostas"));

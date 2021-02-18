@@ -1,6 +1,7 @@
 package br.com.zup.propostas.cartao.carteira;
 
 import br.com.zup.propostas.cartao.Cartao;
+import br.com.zup.propostas.compartilhado.exception.ApiErrors;
 import br.com.zup.propostas.compartilhado.transaction.TransactionExecutor;
 import br.com.zup.propostas.feign.cartao.CartaoClient;
 import io.opentracing.Span;
@@ -49,7 +50,8 @@ public class InclusaoCarteiraController {
 
         boolean carteiraValida = carteiraRepetidaValidator.carteiraValida(request);
         if (!carteiraValida)
-            return ResponseEntity.unprocessableEntity().build();
+            return ResponseEntity.unprocessableEntity().body(new ApiErrors("carteira",
+                    "Carteira " + request.getCarteira() + " já associada ao cartão."));
 
         logger.info("Iniciando criação de carteira para o cartão {}", cartao.getId());
 

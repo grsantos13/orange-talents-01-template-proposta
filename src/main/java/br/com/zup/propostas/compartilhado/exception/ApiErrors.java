@@ -7,6 +7,16 @@ public class ApiErrors {
     private List<String> globalErrors = new ArrayList<>();
     private List<FieldErrorResponse> fieldErrors = new ArrayList<>();
 
+    public ApiErrors() {
+    }
+
+    public ApiErrors(String field, String message) {
+        addFieldError(field, message);
+    }
+    public ApiErrors(String message) {
+        addGlobalError(message);
+    }
+
     public void addGlobalError(String message) {
         globalErrors.add(message);
     }
@@ -21,5 +31,9 @@ public class ApiErrors {
 
     public List<FieldErrorResponse> getFieldErrors() {
         return fieldErrors;
+    }
+
+    public int getNumberOfErrors(){
+        return this.fieldErrors.size() + this.globalErrors.size();
     }
 }

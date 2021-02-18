@@ -1,6 +1,7 @@
 package br.com.zup.propostas.cartao.viagem;
 
 import br.com.zup.propostas.cartao.Cartao;
+import br.com.zup.propostas.compartilhado.exception.ApiErrors;
 import br.com.zup.propostas.compartilhado.transaction.TransactionExecutor;
 import br.com.zup.propostas.feign.cartao.CartaoClient;
 import io.opentracing.Span;
@@ -44,12 +45,11 @@ public class AvisoViagemController {
 
         String ipCliente = servletRequest.getRemoteAddr();
         String userAgent = servletRequest.getHeader("User-Agent");
+        if (ipCliente == null || userAgent == null)
+            return ResponseEntity.unprocessableEntity().body(new ApiErrors("IP ou header User-Agent não encontrados."));
 
         logger.info("Aviso de viagem do cartão {} pelo user-agent {}, ip {}",
                 cartao.getId(), userAgent, ipCliente);
-
-        if (ipCliente == null || userAgent == null)
-            return ResponseEntity.unprocessableEntity().build();
 
         cartaoClient.avisarViagem(cartao.getNumero(), request);
         logger.info("Notificação ao sistema bancário enviada");
