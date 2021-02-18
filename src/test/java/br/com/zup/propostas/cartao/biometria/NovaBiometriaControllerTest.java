@@ -16,8 +16,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import javax.transaction.Transactional;
-
-import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -42,7 +40,7 @@ class NovaBiometriaControllerTest {
     private Cartao cartao;
 
     @BeforeEach
-    public void setup(){
+    public void setup() {
         proposta = TesteDataBuilder.getNovaPropostaRequest().toModel();
         executor.persist(proposta);
         cartao = TesteDataBuilder.getCartao(proposta);
@@ -55,8 +53,8 @@ class NovaBiometriaControllerTest {
         NovaBiometriaRequest request = new NovaBiometriaRequest(Base64.getEncoder().encode("Digital123".getBytes()));
         String json = mapper.writeValueAsString(request);
         mvc.perform(post("/cartoes/{id}/biometrias", cartao.getId())
-        .contentType(MediaType.APPLICATION_JSON).content(json))
-        .andExpect(status().isCreated());
+                .contentType(MediaType.APPLICATION_JSON).content(json))
+                .andExpect(status().isCreated());
     }
 
     @Test
