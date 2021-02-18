@@ -36,7 +36,7 @@ public class NovaBiometriaController {
                                            UriComponentsBuilder uriBuilder) {
         Cartao cartao = executor.find(Cartao.class, id);
 
-        cartao.addBiometria(request.getDigital());
+        cartao.addBiometria(request.getDigital().getBytes());
         executor.merge(cartao);
 
         Biometria biometria = cartao.getBiometrias().stream()

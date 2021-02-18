@@ -5,10 +5,10 @@ import javax.validation.ConstraintValidatorContext;
 
 import static org.apache.tomcat.util.codec.binary.Base64.isBase64;
 
-public class Base64Validator implements ConstraintValidator<Base64, byte[]> {
+public class Base64Validator implements ConstraintValidator<Base64, String> {
 
     @Override
-    public boolean isValid(byte[] value, ConstraintValidatorContext context) {
+    public boolean isValid(String value, ConstraintValidatorContext context) {
         if (value == null)
             return true;
 

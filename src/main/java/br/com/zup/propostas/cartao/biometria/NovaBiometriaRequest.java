@@ -2,23 +2,23 @@ package br.com.zup.propostas.cartao.biometria;
 
 import br.com.zup.propostas.compartilhado.validacao.base64.Base64;
 
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotBlank;
 
 public class NovaBiometriaRequest {
 
-    @NotNull
+    @NotBlank
     @Base64
-    private byte[] digital;
+    private String digital;
 
     @Deprecated
     public NovaBiometriaRequest() {
     }
 
-    public NovaBiometriaRequest(@NotNull byte[] digital) {
+    public NovaBiometriaRequest(@NotBlank String digital) {
         this.digital = digital;
     }
 
-    public byte[] getDigital() {
+    public String getDigital() {
         return digital;
     }
 }

@@ -50,7 +50,7 @@ class NovaBiometriaControllerTest {
     @Test
     @DisplayName("Deve criar a biometria com sucesso.")
     void teste1() throws Exception {
-        NovaBiometriaRequest request = new NovaBiometriaRequest(Base64.getEncoder().encode("Digital123".getBytes()));
+        NovaBiometriaRequest request = new NovaBiometriaRequest("Digital123");
         String json = mapper.writeValueAsString(request);
         mvc.perform(post("/cartoes/{id}/biometrias", cartao.getId())
                 .contentType(MediaType.APPLICATION_JSON).content(json))
