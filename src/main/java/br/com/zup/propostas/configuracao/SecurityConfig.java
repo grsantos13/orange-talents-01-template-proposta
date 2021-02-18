@@ -18,8 +18,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         .antMatchers(HttpMethod.GET, "/propostas/**").hasAuthority("SCOPE_propostas:read")
                         .antMatchers(HttpMethod.POST, "/cartoes/**").hasAuthority("SCOPE_cartoes:write")
                         .antMatchers(HttpMethod.GET, "/actuator/**").permitAll()
-                        .anyRequest().permitAll()).csrf().disable()
-                .headers().frameOptions().sameOrigin().and()
+                        .anyRequest().authenticated())
                 .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt);
     }
 }
