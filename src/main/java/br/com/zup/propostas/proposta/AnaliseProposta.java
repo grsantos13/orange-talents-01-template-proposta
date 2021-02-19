@@ -6,7 +6,9 @@ import br.com.zup.propostas.feign.analise.AnalisePropostaResponse;
 import feign.FeignException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class AnaliseProposta {
@@ -29,7 +31,7 @@ public class AnaliseProposta {
             return "COM_RESTRICAO";
         } catch (FeignException e) {
             logger.error("Ocorreu o erro " + e.getMessage() + " ao analisar a solicitação. Tente novamente.");
-            return null;
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }
