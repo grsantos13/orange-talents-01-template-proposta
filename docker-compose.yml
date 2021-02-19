@@ -131,6 +131,7 @@ services:
       PERIODICIDADE_ASSOCIA_CARTAO_PROPOSTA: 6000
       KEYCLOAK_ISSUER_URI: http://keycloak:8080/auth/realms/nosso-cartao
       KEYCLOAK_JWKS_URI: http://keycloak:8080/auth/realms/nosso-cartao/protocol/openid-connect/certs
+      CRYPT_KEY_16B: fa0619e19fee3432
 
   jaeger:
     image: jaegertracing/all-in-one

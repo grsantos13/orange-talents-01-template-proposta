@@ -49,8 +49,8 @@ public class NovaPropostaController {
         boolean documentoValido = validador.documentoEstaValido(request);
 
         if (!documentoValido) {
-            logger.error("Já existe uma proposta para o documento {}", request.getDocumento());
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY);
+            logger.error("Já existe uma proposta para o documento ...{}", getDocumentSubstring(request));
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Já existe uma proposta para o documento ..."+ getDocumentSubstring(request));
         }
 
         Proposta proposta = request.toModel();
@@ -79,5 +79,9 @@ public class NovaPropostaController {
         logger.info("Proposta {} criada com sucesso pelo usuário {}",
                 proposta.getId(), request.getEmail());
         return ResponseEntity.created(uri).build();
+    }
+
+    private String getDocumentSubstring(@RequestBody @Valid NovaPropostaRequest request) {
+        return request.getDocumento().substring(request.getDocumento().length() - 5);
     }
 }
