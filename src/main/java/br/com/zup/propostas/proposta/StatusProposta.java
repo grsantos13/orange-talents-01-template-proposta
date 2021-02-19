@@ -2,7 +2,8 @@ package br.com.zup.propostas.proposta;
 
 public enum StatusProposta {
     ELEGIVEL("SEM_RESTRICAO"),
-    NAO_ELEGIVEL("COM_RESTRICAO");
+    NAO_ELEGIVEL("COM_RESTRICAO"),
+    CARTAO_ASSOCIADO("ASSOCIADO");
 
     private String descricao;
 

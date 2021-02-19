@@ -104,12 +104,13 @@ public class Proposta {
     }
 
     public void atualizarStatus(String resultadoSolicitacao) {
-        Assert.isTrue(this.status == null, "Status da proposta já incluído.");
+        Assert.isTrue(this.status == null || this.status.equals(StatusProposta.ELEGIVEL), "Status da proposta já incluído.");
         this.status = StatusProposta.toEnum(resultadoSolicitacao);
     }
 
     public void associarCartao(CartaoResponse response) {
         Assert.isTrue(this.status.equals(StatusProposta.ELEGIVEL), "Um cartão não pode ser associado a uma proposta não elegível.");
+        Assert.isTrue(!this.status.equals(StatusProposta.CARTAO_ASSOCIADO), "Um cartão não pode ser associado a uma proposta com cartão associado.");
         Assert.isNull(this.cartao, "Já existe um cartão associado.");
         this.cartao = new Cartao(this, response.getId(), response.getEmitidoEm(), response.getLimite());
     }
