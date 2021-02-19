@@ -42,8 +42,11 @@ public class Proposta {
 
     @CPFouCNPJ
     @NotBlank
-    @Column(name = "documento", nullable = false, unique = true)
-    @Convert(converter = ConversorCrypto.class)
+    @Column(name = "documento", nullable = false, unique = true, columnDefinition = "bytea")
+    @ColumnTransformer(forColumn = "documento",
+            read = "pgp_sym_decrypt(documento, current_setting('encrypt.key'))",
+            write = "pgp_sym_encrypt(?, current_setting('encrypt.key'))"
+    )
     private String documento;
 
     @NotNull
