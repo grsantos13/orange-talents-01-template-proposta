@@ -2,7 +2,7 @@ package br.com.zup.propostas.proposta;
 
 import br.com.zup.propostas.compartilhado.transaction.TransactionExecutor;
 import br.com.zup.propostas.data.TesteDataBuilder;
-import br.com.zup.propostas.feign.analise.AnaliseProposta;
+import br.com.zup.propostas.feign.analise.AnalisePropostaClient;
 import br.com.zup.propostas.feign.analise.AnalisePropostaRequest;
 import br.com.zup.propostas.feign.analise.AnalisePropostaResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -47,7 +47,7 @@ class NovaPropostaControllerTest {
     @MockBean
     private ImpedeDocumentoIgualValidator validador;
     @MockBean
-    private AnaliseProposta analiseProposta;
+    private AnalisePropostaClient analisePropostaClient;
     @Autowired
     private ObjectMapper mapper;
     @Autowired
@@ -69,7 +69,7 @@ class NovaPropostaControllerTest {
         }).when(executor).persist(Mockito.any(Proposta.class));
 
         Mockito.when(validador.documentoEstaValido(Mockito.any(NovaPropostaRequest.class))).thenReturn(true);
-        Mockito.when(analiseProposta.analisarProposta(Mockito.any(AnalisePropostaRequest.class))).thenReturn(new AnalisePropostaResponse("44444444444", "Gustavo", "SEM_RESTRICAO", id.toString()));
+        Mockito.when(analisePropostaClient.analisarProposta(Mockito.any(AnalisePropostaRequest.class))).thenReturn(new AnalisePropostaResponse("44444444444", "Gustavo", "SEM_RESTRICAO", id.toString()));
 
         mvc.perform(post("/propostas")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -111,7 +111,7 @@ class NovaPropostaControllerTest {
         }).when(executor).persist(Mockito.any(Proposta.class));
 
         Mockito.when(validador.documentoEstaValido(Mockito.any(NovaPropostaRequest.class))).thenReturn(true);
-        Mockito.when(analiseProposta.analisarProposta(Mockito.any(AnalisePropostaRequest.class))).thenReturn(new AnalisePropostaResponse("44444444444", "Gustavo", "SEM_RESTRICAO", id.toString()));
+        Mockito.when(analisePropostaClient.analisarProposta(Mockito.any(AnalisePropostaRequest.class))).thenReturn(new AnalisePropostaResponse("44444444444", "Gustavo", "SEM_RESTRICAO", id.toString()));
 
         mvc.perform(post("/propostas")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -147,7 +147,7 @@ class NovaPropostaControllerTest {
 
         Mockito.when(tracer.activeSpan()).thenReturn(TesteDataBuilder.getSpan());
         Mockito.when(validador.documentoEstaValido(Mockito.any(NovaPropostaRequest.class))).thenReturn(true);
-        Mockito.when(analiseProposta.analisarProposta(Mockito.any(AnalisePropostaRequest.class))).thenThrow(FeignException.UnprocessableEntity.class);
+        Mockito.when(analisePropostaClient.analisarProposta(Mockito.any(AnalisePropostaRequest.class))).thenThrow(FeignException.UnprocessableEntity.class);
 
         mvc.perform(post("/propostas")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -175,7 +175,7 @@ class NovaPropostaControllerTest {
 
         Mockito.when(tracer.activeSpan()).thenReturn(TesteDataBuilder.getSpan());
         Mockito.when(validador.documentoEstaValido(Mockito.any(NovaPropostaRequest.class))).thenReturn(true);
-        Mockito.when(analiseProposta.analisarProposta(Mockito.any(AnalisePropostaRequest.class))).thenThrow(FeignException.class);
+        Mockito.when(analisePropostaClient.analisarProposta(Mockito.any(AnalisePropostaRequest.class))).thenThrow(FeignException.class);
 
         mvc.perform(post("/propostas")
                 .contentType(MediaType.APPLICATION_JSON)

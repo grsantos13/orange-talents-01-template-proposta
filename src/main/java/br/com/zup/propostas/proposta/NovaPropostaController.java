@@ -1,11 +1,6 @@
 package br.com.zup.propostas.proposta;
 
-import br.com.zup.propostas.compartilhado.exception.ApiErrors;
 import br.com.zup.propostas.compartilhado.transaction.TransactionExecutor;
-import br.com.zup.propostas.feign.analise.AnaliseProposta;
-import br.com.zup.propostas.feign.analise.AnalisePropostaRequest;
-import br.com.zup.propostas.feign.analise.AnalisePropostaResponse;
-import feign.FeignException;
 import io.opentracing.Span;
 import io.opentracing.Tracer;
 import org.slf4j.Logger;
@@ -49,39 +44,30 @@ public class NovaPropostaController {
         boolean documentoValido = validador.documentoEstaValido(request);
 
         if (!documentoValido) {
-            logger.error("Já existe uma proposta para o documento ...{}", getDocumentSubstring(request));
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Já existe uma proposta para o documento ..."+ getDocumentSubstring(request));
+            logger.error("Já existe uma proposta para o documento ...{}", request.documentoOfuscado());
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Já existe uma proposta para o documento ..." + request.documentoOfuscado());
         }
 
         Proposta proposta = request.toModel();
         executor.persist(proposta);
 
-        AnalisePropostaRequest propostaRequest = new AnalisePropostaRequest(request.getNome(),
-                request.getDocumento(), proposta.getId().toString());
+        String status = analiseProposta.analisarProposta(request, proposta);
 
-        try {
-            AnalisePropostaResponse analiseProposta = this.analiseProposta.analisarProposta(propostaRequest);
-            proposta.atualizarStatus(analiseProposta.getResultadoSolicitacao());
-        } catch (FeignException.UnprocessableEntity e) {
-            proposta.atualizarStatus("COM_RESTRICAO");
-        } catch (FeignException e) {
-            logger.error("Ocorreu o erro " + e.getMessage() + " ao analisar a solicitação. Tente novamente.");
-            executor.remove(proposta);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+        if (status != null) {
+            executor.merge(proposta);
+
+            URI uri = uriBuilder.path("/propostas/{id}")
+                    .buildAndExpand(proposta.getId())
+                    .toUri();
+
+            logger.info("Proposta {} criada com sucesso pelo usuário {}",
+                    proposta.getId(), request.getEmail());
+
+            return ResponseEntity.created(uri).build();
         }
 
-        executor.merge(proposta);
-
-        URI uri = uriBuilder.path("/propostas/{id}")
-                .buildAndExpand(proposta.getId())
-                .toUri();
-
-        logger.info("Proposta {} criada com sucesso pelo usuário {}",
-                proposta.getId(), request.getEmail());
-        return ResponseEntity.created(uri).build();
+        executor.remove(proposta);
+        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    private String getDocumentSubstring(@RequestBody @Valid NovaPropostaRequest request) {
-        return request.getDocumento().substring(request.getDocumento().length() - 5);
-    }
 }

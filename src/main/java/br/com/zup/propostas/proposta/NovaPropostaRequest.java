@@ -56,6 +56,10 @@ public class NovaPropostaRequest {
         return salario;
     }
 
+    public String documentoOfuscado(){
+        return this.documento.substring(this.documento.length() - 5);
+    }
+
     public Proposta toModel() {
         return new Proposta(nome, email, documento, new Endereco(this.endereco), salario);
     }
