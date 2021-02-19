@@ -1,6 +1,8 @@
 package br.com.zup.propostas.proposta;
 
 import br.com.zup.propostas.compartilhado.validacao.CPFouCNPJ.CPFouCNPJ;
+import br.com.zup.propostas.proposta.endereco.Endereco;
+import br.com.zup.propostas.proposta.endereco.EnderecoRequest;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;

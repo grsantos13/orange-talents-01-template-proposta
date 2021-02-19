@@ -5,6 +5,7 @@ import br.com.zup.propostas.data.TesteDataBuilder;
 import br.com.zup.propostas.feign.analise.AnalisePropostaClient;
 import br.com.zup.propostas.feign.analise.AnalisePropostaRequest;
 import br.com.zup.propostas.feign.analise.AnalisePropostaResponse;
+import br.com.zup.propostas.proposta.endereco.EnderecoRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
 import io.opentracing.Tracer;

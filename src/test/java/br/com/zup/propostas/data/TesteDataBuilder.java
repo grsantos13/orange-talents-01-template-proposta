@@ -3,7 +3,7 @@ package br.com.zup.propostas.data;
 import br.com.zup.propostas.cartao.Cartao;
 import br.com.zup.propostas.cartao.carteira.NovaCarteiraRequest;
 import br.com.zup.propostas.cartao.carteira.TipoCarteira;
-import br.com.zup.propostas.proposta.EnderecoRequest;
+import br.com.zup.propostas.proposta.endereco.EnderecoRequest;
 import br.com.zup.propostas.proposta.NovaPropostaRequest;
 import br.com.zup.propostas.proposta.Proposta;
 import io.opentracing.Span;

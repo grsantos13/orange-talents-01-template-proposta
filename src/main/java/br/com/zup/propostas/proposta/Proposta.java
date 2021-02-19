@@ -3,12 +3,12 @@ package br.com.zup.propostas.proposta;
 import br.com.zup.propostas.cartao.Cartao;
 import br.com.zup.propostas.compartilhado.validacao.CPFouCNPJ.CPFouCNPJ;
 import br.com.zup.propostas.feign.cartao.CartaoResponse;
+import br.com.zup.propostas.proposta.endereco.Endereco;
 import org.hibernate.annotations.ColumnTransformer;
 import org.springframework.util.Assert;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.Convert;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
