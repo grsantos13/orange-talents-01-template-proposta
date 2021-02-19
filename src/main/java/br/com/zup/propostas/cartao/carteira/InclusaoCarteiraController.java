@@ -8,12 +8,14 @@ import io.opentracing.Span;
 import io.opentracing.Tracer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.validation.Valid;
@@ -50,8 +52,7 @@ public class InclusaoCarteiraController {
 
         boolean carteiraValida = carteiraRepetidaValidator.carteiraValida(request);
         if (!carteiraValida)
-            return ResponseEntity.unprocessableEntity().body(new ApiErrors("carteira",
-                    "Carteira " + request.getCarteira() + " já associada ao cartão."));
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Carteira " + request.getCarteira() + " já existente");
 
         logger.info("Iniciando criação de carteira para o cartão {}", cartao.getId());
 

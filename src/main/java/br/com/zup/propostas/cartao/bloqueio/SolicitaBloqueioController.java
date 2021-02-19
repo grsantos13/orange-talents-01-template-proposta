@@ -9,11 +9,13 @@ import io.opentracing.Span;
 import io.opentracing.Tracer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.UUID;
@@ -43,13 +45,13 @@ public class SolicitaBloqueioController {
         String ipCliente = request.getRemoteAddr();
         String userAgent = request.getHeader("User-Agent");
         if (ipCliente == null || userAgent == null)
-            return ResponseEntity.unprocessableEntity().body(new ApiErrors("IP ou header User-Agent não encontrados."));
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "IP ou header User-Agent não encontrados.");
 
         logger.info("Tentativa de bloqueio do cartão {} pelo user-agent {}, ip {}",
                 cartao.getId(), userAgent, ipCliente);
 
         if (cartao.estaBloqueado())
-            return ResponseEntity.unprocessableEntity().body(new ApiErrors("Cartão " + cartao.getId() + " já está bloqueado."));
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Cartão " + cartao.getId() + " já está bloqueado.");
 
         SolicitacaoBloqueioResponse bloqueioResponse = cartaoClient.bloquearCartao(cartao.getNumero(),
                 new NovoBloqueioRequest("Propostas"));

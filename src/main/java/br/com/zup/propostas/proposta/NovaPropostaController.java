@@ -50,8 +50,7 @@ public class NovaPropostaController {
 
         if (!documentoValido) {
             logger.error("Já existe uma proposta para o documento {}", request.getDocumento());
-            return ResponseEntity.unprocessableEntity().body(new ApiErrors("documento",
-                    "Proposta existente para o documento " + request.getDocumento()));
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY);
         }
 
         Proposta proposta = request.toModel();
