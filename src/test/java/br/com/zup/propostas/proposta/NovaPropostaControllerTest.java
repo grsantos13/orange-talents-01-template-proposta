@@ -1,54 +1,51 @@
 package br.com.zup.propostas.proposta;
 
-import br.com.zup.propostas.compartilhado.transaction.TransactionExecutor;
 import br.com.zup.propostas.data.TesteDataBuilder;
-import br.com.zup.propostas.feign.analise.AnalisePropostaClient;
-import br.com.zup.propostas.feign.analise.AnalisePropostaRequest;
-import br.com.zup.propostas.feign.analise.AnalisePropostaResponse;
 import br.com.zup.propostas.proposta.endereco.EnderecoRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import feign.FeignException;
 import io.opentracing.Tracer;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.server.ResponseStatusException;
 
+import javax.persistence.EntityManager;
 import java.math.BigDecimal;
 import java.util.UUID;
 import java.util.stream.Stream;
 
 import static br.com.zup.propostas.data.TesteDataBuilder.getNovaPropostaRequest;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace.NONE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(SpringExtension.class)
-@WebMvcTest(controllers = NovaPropostaController.class)
-@AutoConfigureMockMvc
+@SpringBootTest
+@AutoConfigureTestDatabase(replace = NONE)
+@AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
 class NovaPropostaControllerTest {
 
     @MockBean
-    private TransactionExecutor executor;
+    private EntityManager manager;
     @MockBean
     private ImpedeDocumentoIgualValidator validador;
     @MockBean
-    private AnalisePropostaClient analisePropostaClient;
+    private AnaliseProposta analiseProposta;
     @Autowired
     private ObjectMapper mapper;
     @Autowired
@@ -67,10 +64,10 @@ class NovaPropostaControllerTest {
             Proposta proposta = invocation.getArgument(0);
             ReflectionTestUtils.setField(proposta, "id", id);
             return proposta;
-        }).when(executor).persist(Mockito.any(Proposta.class));
+        }).when(manager).persist(Mockito.any(Proposta.class));
 
         Mockito.when(validador.documentoEstaValido(Mockito.any(NovaPropostaRequest.class))).thenReturn(true);
-        Mockito.when(analisePropostaClient.analisarProposta(Mockito.any(AnalisePropostaRequest.class))).thenReturn(new AnalisePropostaResponse("44444444444", "Gustavo", "SEM_RESTRICAO", id.toString()));
+        Mockito.when(analiseProposta.analisarProposta(Mockito.any(NovaPropostaRequest.class), Mockito.any(Proposta.class))).thenReturn("SEM_RESTRICAO");
 
         mvc.perform(post("/propostas")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -79,7 +76,7 @@ class NovaPropostaControllerTest {
                 .andExpect(header().string("Location", "http://localhost/propostas/" + id));
 
         ArgumentCaptor<Proposta> captor = ArgumentCaptor.forClass(Proposta.class);
-        Mockito.verify(executor).merge(captor.capture());
+        Mockito.verify(manager).merge(captor.capture());
         assertEquals(StatusProposta.ELEGIVEL, captor.getValue().getStatus());
     }
 
@@ -109,10 +106,10 @@ class NovaPropostaControllerTest {
             Proposta proposta = invocation.getArgument(0);
             ReflectionTestUtils.setField(proposta, "id", id);
             return proposta;
-        }).when(executor).persist(Mockito.any(Proposta.class));
+        }).when(manager).persist(Mockito.any(Proposta.class));
 
         Mockito.when(validador.documentoEstaValido(Mockito.any(NovaPropostaRequest.class))).thenReturn(true);
-        Mockito.when(analisePropostaClient.analisarProposta(Mockito.any(AnalisePropostaRequest.class))).thenReturn(new AnalisePropostaResponse("44444444444", "Gustavo", "SEM_RESTRICAO", id.toString()));
+        Mockito.when(analiseProposta.analisarProposta(Mockito.any(NovaPropostaRequest.class), Mockito.any(Proposta.class))).thenReturn("SEM_RESTRICAO");
 
         mvc.perform(post("/propostas")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -144,11 +141,11 @@ class NovaPropostaControllerTest {
             Proposta proposta = invocation.getArgument(0);
             ReflectionTestUtils.setField(proposta, "id", id);
             return proposta;
-        }).when(executor).persist(Mockito.any(Proposta.class));
+        }).when(manager).persist(Mockito.any(Proposta.class));
 
         Mockito.when(tracer.activeSpan()).thenReturn(TesteDataBuilder.getSpan());
         Mockito.when(validador.documentoEstaValido(Mockito.any(NovaPropostaRequest.class))).thenReturn(true);
-        Mockito.when(analisePropostaClient.analisarProposta(Mockito.any(AnalisePropostaRequest.class))).thenThrow(FeignException.UnprocessableEntity.class);
+        Mockito.when(analiseProposta.analisarProposta(Mockito.any(NovaPropostaRequest.class), Mockito.any(Proposta.class))).thenReturn("COM_RESTRICAO");
 
         mvc.perform(post("/propostas")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -157,7 +154,7 @@ class NovaPropostaControllerTest {
                 .andExpect(header().string("Location", "http://localhost/propostas/" + id));
 
         ArgumentCaptor<Proposta> captor = ArgumentCaptor.forClass(Proposta.class);
-        Mockito.verify(executor).merge(captor.capture());
+        Mockito.verify(manager).merge(captor.capture());
         assertEquals(StatusProposta.NAO_ELEGIVEL, captor.getValue().getStatus());
     }
 
@@ -172,17 +169,16 @@ class NovaPropostaControllerTest {
             Proposta proposta = invocation.getArgument(0);
             ReflectionTestUtils.setField(proposta, "id", id);
             return proposta;
-        }).when(executor).persist(Mockito.any(Proposta.class));
+        }).when(manager).persist(Mockito.any(Proposta.class));
 
         Mockito.when(tracer.activeSpan()).thenReturn(TesteDataBuilder.getSpan());
         Mockito.when(validador.documentoEstaValido(Mockito.any(NovaPropostaRequest.class))).thenReturn(true);
-        Mockito.when(analisePropostaClient.analisarProposta(Mockito.any(AnalisePropostaRequest.class))).thenThrow(FeignException.class);
+        Mockito.when(analiseProposta.analisarProposta(Mockito.any(NovaPropostaRequest.class), Mockito.any(Proposta.class))).thenThrow(ResponseStatusException.class);
 
         mvc.perform(post("/propostas")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json))
                 .andExpect(status().isInternalServerError());
-        Mockito.verify(executor).remove(Mockito.any(Proposta.class));
     }
 
 }
