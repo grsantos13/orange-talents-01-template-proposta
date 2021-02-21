@@ -7,11 +7,13 @@ import br.com.zup.propostas.feign.cartao.CartaoClient;
 import br.com.zup.propostas.proposta.Proposta;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
+import io.opentracing.Tracer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -24,11 +26,13 @@ import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.UUID;
 
+import static org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace.NONE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
-@AutoConfigureMockMvc
+@AutoConfigureMockMvc(addFilters = false)
+@AutoConfigureTestDatabase(replace = NONE)
 @Transactional
 @ActiveProfiles("test")
 class AvisoViagemControllerTest {
@@ -43,6 +47,8 @@ class AvisoViagemControllerTest {
     private MockMvc mvc;
     @Autowired
     private ObjectMapper mapper;
+    @MockBean
+    private Tracer tracer;
 
     private Proposta proposta;
     private Cartao cartao;
@@ -61,6 +67,7 @@ class AvisoViagemControllerTest {
         NovoAvisoViagemRequest request = new NovoAvisoViagemRequest("França", LocalDate.now().plusDays(5));
         String json = mapper.writeValueAsString(request);
 
+        Mockito.when(tracer.activeSpan()).thenReturn(TesteDataBuilder.getSpan());
         Mockito.when(executor.find(Mockito.any(), Mockito.any(UUID.class))).thenReturn(cartao);
         Mockito.when(cartaoClient.avisarViagem(Mockito.any(String.class), Mockito.any(NovoAvisoViagemRequest.class))).thenReturn(null);
 
@@ -76,6 +83,7 @@ class AvisoViagemControllerTest {
         NovoAvisoViagemRequest request = new NovoAvisoViagemRequest("França", LocalDate.now().plusDays(5));
         String json = mapper.writeValueAsString(request);
 
+        Mockito.when(tracer.activeSpan()).thenReturn(TesteDataBuilder.getSpan());
         Mockito.when(executor.find(Mockito.any(), Mockito.any(UUID.class))).thenReturn(cartao);
         Mockito.when(cartaoClient.avisarViagem(Mockito.any(String.class), Mockito.any(NovoAvisoViagemRequest.class))).thenReturn(null);
 
@@ -90,6 +98,7 @@ class AvisoViagemControllerTest {
         NovoAvisoViagemRequest request = new NovoAvisoViagemRequest("França", LocalDate.now().plusDays(5));
         String json = mapper.writeValueAsString(request);
 
+        Mockito.when(tracer.activeSpan()).thenReturn(TesteDataBuilder.getSpan());
         Mockito.when(executor.find(Mockito.any(), Mockito.any(UUID.class))).thenReturn(cartao);
         Mockito.when(cartaoClient.avisarViagem(Mockito.any(String.class), Mockito.any(NovoAvisoViagemRequest.class))).thenThrow(FeignException.class);
 

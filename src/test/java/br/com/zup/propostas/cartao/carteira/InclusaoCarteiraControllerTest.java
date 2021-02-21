@@ -6,6 +6,7 @@ import br.com.zup.propostas.data.TesteDataBuilder;
 import br.com.zup.propostas.feign.cartao.CartaoClient;
 import br.com.zup.propostas.proposta.Proposta;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.opentracing.Tracer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,6 +15,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -26,11 +28,13 @@ import javax.transaction.Transactional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import static org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace.NONE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
-@AutoConfigureMockMvc
+@AutoConfigureMockMvc(addFilters = false)
+@AutoConfigureTestDatabase(replace = NONE)
 @Transactional
 @ActiveProfiles("test")
 class InclusaoCarteiraControllerTest {
@@ -41,12 +45,14 @@ class InclusaoCarteiraControllerTest {
     private TransactionExecutor executor;
     @MockBean
     private CartaoClient cartaoClient;
-    @Autowired
+    @MockBean
     private CarteiraRepetidaValidator carteiraRepetidaValidator;
     @Autowired
     private MockMvc mvc;
     @Autowired
     private ObjectMapper mapper;
+    @MockBean
+    private Tracer tracer;
 
     private Proposta proposta;
     private Cartao cartao;
@@ -65,6 +71,8 @@ class InclusaoCarteiraControllerTest {
         NovaCarteiraRequest request = TesteDataBuilder.getNovaCarteiraRequest(TipoCarteira.PAYPAL);
         String json = mapper.writeValueAsString(request);
 
+        Mockito.when(carteiraRepetidaValidator.carteiraValida(Mockito.any(NovaCarteiraRequest.class))).thenReturn(true);
+        Mockito.when(tracer.activeSpan()).thenReturn(TesteDataBuilder.getSpan());
         Mockito.when(executor.find(Mockito.any(), Mockito.any(UUID.class))).thenReturn(cartao);
         Mockito.when(cartaoClient.incluirCarteira(Mockito.any(String.class), Mockito.any(NovaCarteiraRequest.class))).thenReturn(null);
 
@@ -78,9 +86,11 @@ class InclusaoCarteiraControllerTest {
     void teste2() throws Exception {
         NovaCarteiraRequest request = TesteDataBuilder.getNovaCarteiraRequest(TipoCarteira.PAYPAL);
         cartao.addCarteira(request);
-        manager.merge(cartao);
 
         String json = mapper.writeValueAsString(request);
+
+        Mockito.when(carteiraRepetidaValidator.carteiraValida(Mockito.any(NovaCarteiraRequest.class))).thenReturn(false);
+        Mockito.when(tracer.activeSpan()).thenReturn(TesteDataBuilder.getSpan());
         Mockito.when(executor.find(Mockito.any(), Mockito.any(UUID.class))).thenReturn(cartao);
         Mockito.when(cartaoClient.incluirCarteira(Mockito.any(String.class), Mockito.any(NovaCarteiraRequest.class))).thenReturn(null);
 

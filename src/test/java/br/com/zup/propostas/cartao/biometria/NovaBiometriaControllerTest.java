@@ -9,21 +9,28 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import javax.transaction.Transactional;
 
+import java.util.Base64;
+
+import static org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace.NONE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
-@AutoConfigureMockMvc
+@SpringBootTest()
+@AutoConfigureMockMvc(addFilters = false)
 @Transactional
 @ActiveProfiles("test")
+@AutoConfigureTestDatabase(replace = NONE)
 class NovaBiometriaControllerTest {
 
     @Autowired
@@ -49,7 +56,9 @@ class NovaBiometriaControllerTest {
     @Test
     @DisplayName("Deve criar a biometria com sucesso.")
     void teste1() throws Exception {
-        NovaBiometriaRequest request = new NovaBiometriaRequest("Digital123");
+
+        String biometria = Base64.getEncoder().encodeToString("digital".getBytes());
+        NovaBiometriaRequest request = new NovaBiometriaRequest(biometria);
         String json = mapper.writeValueAsString(request);
         mvc.perform(post("/cartoes/{id}/biometrias", cartao.getId())
                 .contentType(MediaType.APPLICATION_JSON).content(json))
@@ -65,6 +74,18 @@ class NovaBiometriaControllerTest {
         mvc.perform(post("/cartoes/{id}/biometrias", cartao.getId())
                 .contentType(MediaType.APPLICATION_JSON).content(json))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("Deve dar erro pela biometria não estar em Base64.")
+    void teste3() throws Exception {
+        NovaBiometriaRequest request = new NovaBiometriaRequest("digital");
+        String json = mapper.writeValueAsString(request);
+
+        mvc.perform(post("/cartoes/{id}/biometrias", cartao.getId())
+                .contentType(MediaType.APPLICATION_JSON).content(json))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("fieldErrors[0].field").value("digital"));
     }
 
 }
