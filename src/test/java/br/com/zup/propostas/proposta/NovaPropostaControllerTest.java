@@ -16,6 +16,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -173,7 +174,8 @@ class NovaPropostaControllerTest {
 
         Mockito.when(tracer.activeSpan()).thenReturn(TesteDataBuilder.getSpan());
         Mockito.when(validador.documentoEstaValido(Mockito.any(NovaPropostaRequest.class))).thenReturn(true);
-        Mockito.when(analiseProposta.analisarProposta(Mockito.any(NovaPropostaRequest.class), Mockito.any(Proposta.class))).thenThrow(ResponseStatusException.class);
+        Mockito.when(analiseProposta.analisarProposta(Mockito.any(NovaPropostaRequest.class)
+                , Mockito.any(Proposta.class))).thenThrow(new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR));
 
         mvc.perform(post("/propostas")
                 .contentType(MediaType.APPLICATION_JSON)
