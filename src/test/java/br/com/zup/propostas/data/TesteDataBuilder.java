@@ -3,6 +3,9 @@ package br.com.zup.propostas.data;
 import br.com.zup.propostas.cartao.Cartao;
 import br.com.zup.propostas.cartao.carteira.NovaCarteiraRequest;
 import br.com.zup.propostas.cartao.carteira.TipoCarteira;
+import br.com.zup.propostas.feign.cartao.CartaoResponse;
+import br.com.zup.propostas.feign.cartao.RenegociacaoResponse;
+import br.com.zup.propostas.feign.cartao.VencimentoResponse;
 import br.com.zup.propostas.proposta.endereco.EnderecoRequest;
 import br.com.zup.propostas.proposta.NovaPropostaRequest;
 import br.com.zup.propostas.proposta.Proposta;
@@ -12,7 +15,9 @@ import io.opentracing.tag.Tag;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class TesteDataBuilder {
 
@@ -29,6 +34,22 @@ public class TesteDataBuilder {
 
     public static NovaCarteiraRequest getNovaCarteiraRequest(TipoCarteira tipo){
         return new NovaCarteiraRequest("gustavo@gmail.com", tipo);
+    }
+
+    public static CartaoResponse getCartaoResponse(){
+        return new CartaoResponse(
+                "1111-1111-1111-1111",
+                LocalDateTime.now(),
+                "Teste",
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of(),
+                BigDecimal.TEN,
+                new RenegociacaoResponse(),
+                new VencimentoResponse(),
+                UUID.randomUUID().toString()
+        );
     }
 
     public static Span getSpan() {
