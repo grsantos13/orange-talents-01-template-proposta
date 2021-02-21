@@ -3,6 +3,7 @@ package br.com.zup.propostas.data;
 import br.com.zup.propostas.cartao.Cartao;
 import br.com.zup.propostas.cartao.carteira.NovaCarteiraRequest;
 import br.com.zup.propostas.cartao.carteira.TipoCarteira;
+import br.com.zup.propostas.feign.analise.AnalisePropostaResponse;
 import br.com.zup.propostas.feign.cartao.CartaoResponse;
 import br.com.zup.propostas.feign.cartao.RenegociacaoResponse;
 import br.com.zup.propostas.feign.cartao.VencimentoResponse;
@@ -34,6 +35,10 @@ public class TesteDataBuilder {
 
     public static NovaCarteiraRequest getNovaCarteiraRequest(TipoCarteira tipo){
         return new NovaCarteiraRequest("gustavo@gmail.com", tipo);
+    }
+
+    public static AnalisePropostaResponse getAnalisePropostaResponse(String resultado){
+        return new AnalisePropostaResponse("00000000000", "nome", resultado, UUID.randomUUID().toString());
     }
 
     public static CartaoResponse getCartaoResponse(){
