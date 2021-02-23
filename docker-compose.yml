@@ -34,10 +34,10 @@ services:
       POSTGRES_DB: keycloak
       POSTGRES_HOST: postgres
 
-  postgrespropostas:
+  postgresservicos:
     image: 'postgres:alpine'
     volumes:
-      - postgrespropostas-volume:/var/lib/postgresql/data
+      - postgresservicos-volume:/var/lib/postgresql/data
     ports:
       - 5433:5432
     environment:
@@ -113,10 +113,10 @@ services:
     ports:
       - 8080:8080
     depends_on:
-      - postgrespropostas
+      - postgresservicos
     environment:
       SPRING_PROFILES_ACTIVE: prod
-      DB_HOST: postgrespropostas
+      DB_HOST: postgresservicos
       DB_PORT: 5432
       DB_NAME: propostas
       DB_USERNAME: propostas
@@ -132,6 +132,33 @@ services:
       KEYCLOAK_ISSUER_URI: http://keycloak:8080/auth/realms/nosso-cartao
       KEYCLOAK_JWKS_URI: http://keycloak:8080/auth/realms/nosso-cartao/protocol/openid-connect/certs
       CRYPT_KEY_16B: fa0619e19fee3432
+
+  transacoesview:
+    build:
+      dockerfile: ./Dockerfile
+      context: ../transacao
+    image: gustavosantoszup/transacoesview
+    ports:
+      - 8081:8080
+    depends_on:
+      - postgresservicos
+    environment:
+      DB_HOST: postgresservicos
+      DB_PORT: 5432
+      DB_NAME: transacoes
+      DB_USERNAME: transacoes
+      DB_PASSWORD: password
+      NOME_DA_APLICACAO: Serviço de Transações
+      AMBIENTE: Produção
+      JAEGER_ENABLED: 1
+      JAEGER_ENDPOINT: http://jaeger:14268/api/traces
+      JAEGER_SAMPLER: 1
+      KEYCLOAK_ISSUER_URI: http://keycloak:8080/auth/realms/nosso-cartao
+      KEYCLOAK_JWKS_URI: http://keycloak:8080/auth/realms/nosso-cartao/protocol/openid-connect/certs
+      KAFKA_SERVER: http://kafka:9092
+      KAFKA_CONSUMER_GROUP: servicotransacoes
+      KAFKA_AUTO-OFFSET-RESET: latest
+      TOPIC: transacoes
 
   jaeger:
     image: jaegertracing/all-in-one
@@ -178,4 +205,4 @@ volumes:
   grafana-volume:
   prometheus-volume:
   postgres-volume:
-  postgrespropostas-volume:
+  postgresservicos-volume:
