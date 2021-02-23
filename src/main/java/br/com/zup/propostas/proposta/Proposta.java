@@ -4,11 +4,12 @@ import br.com.zup.propostas.cartao.Cartao;
 import br.com.zup.propostas.compartilhado.validacao.CPFouCNPJ.CPFouCNPJ;
 import br.com.zup.propostas.feign.cartao.CartaoResponse;
 import br.com.zup.propostas.proposta.endereco.Endereco;
-import org.hibernate.annotations.ColumnTransformer;
+import br.com.zup.propostas.proposta.util.Criptografia;
 import org.springframework.util.Assert;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -43,11 +44,8 @@ public class Proposta {
 
     @CPFouCNPJ
     @NotBlank
-    @Column(name = "documento", nullable = false, unique = true, columnDefinition = "bytea")
-    @ColumnTransformer(forColumn = "documento",
-            read = "pgp_sym_decrypt(documento, current_setting('encrypt.key'))",
-            write = "pgp_sym_encrypt(?, current_setting('encrypt.key'))"
-    )
+    @Column(name = "documento", nullable = false, unique = true)
+    @Convert(converter = Criptografia.class)
     private String documento;
 
     @NotNull
