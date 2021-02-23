@@ -123,7 +123,7 @@ services:
       DB_PASSWORD: password
       NOME_DA_APLICACAO: Serviço de Propostas
       AMBIENTE: Produção
-      JAEGER_ENABLED: 1
+      JAEGER_ENABLED: 'true'
       JAEGER_ENDPOINT: http://jaeger:14268/api/traces
       JAEGER_SAMPLER: 1
       URL_ANALISE_PROPOSTA: http://analise:9999
@@ -131,7 +131,7 @@ services:
       PERIODICIDADE_ASSOCIA_CARTAO_PROPOSTA: 6000
       KEYCLOAK_ISSUER_URI: http://keycloak:8080/auth/realms/nosso-cartao
       KEYCLOAK_JWKS_URI: http://keycloak:8080/auth/realms/nosso-cartao/protocol/openid-connect/certs
-      CRYPT_KEY_16B: fa0619e19fee3432
+      CRYPT_KEY_16B: a0813bff84ac36a
 
   transacoesview:
     build:
@@ -150,12 +150,12 @@ services:
       DB_PASSWORD: password
       NOME_DA_APLICACAO: Serviço de Transações
       AMBIENTE: Produção
-      JAEGER_ENABLED: 1
+      JAEGER_ENABLED: 'true'
       JAEGER_ENDPOINT: http://jaeger:14268/api/traces
       JAEGER_SAMPLER: 1
       KEYCLOAK_ISSUER_URI: http://keycloak:8080/auth/realms/nosso-cartao
       KEYCLOAK_JWKS_URI: http://keycloak:8080/auth/realms/nosso-cartao/protocol/openid-connect/certs
-      KAFKA_SERVER: http://kafka:9092
+      KAFKA_SERVER: http://kafka:29092
       KAFKA_CONSUMER_GROUP: servicotransacoes
       KAFKA_AUTO-OFFSET-RESET: latest
       TOPIC: transacoes
