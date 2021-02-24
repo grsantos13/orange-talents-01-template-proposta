@@ -6,9 +6,9 @@ scrape_configs:
   - job_name: 'proposta'
     metrics_path: '/api/actuator/prometheus'
     static_configs:
-      - targets: ['propostas:8080']
+      - targets: ['host.docker.internal:8080']
 
   - job_name: 'transacao'
     metrics_path: '/api/actuator/prometheus'
     static_configs:
-      - targets: ['transacoesview:8080'] 
+      - targets: ['host.docker.internal:8081']
